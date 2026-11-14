@@ -1322,10 +1322,10 @@ function getMillingInstructionsHtml(hinges, hMain, hMirror, mainSide, qtyMain, q
         const sideLabel = side === 'kaire' ? 'Kairė' : 'Dešinė';
         
         let htmlRows = `<tr><td colspan="2" style="padding-top:2px; font-weight:bold; color:#004085;">Pusė: ${sideLabel} (${qty} vnt., Rėmas: ${totalH}x${totalW}mm)</td></tr>`;
-        htmlRows += `<tr><td style="padding-left:10px;">Profilio pjovimas:</td><td style="text-align:right;"><b>H:</b> ${pCutH} mm | <b>W:</b> ${pCutW} mm</td></tr>`;
+        htmlRows += `<tr><td style="padding-left:10px;">Profilio pjovimas:</td><td style="text-align:right;"><b>A:</b> ${pCutH} mm | <b>P:</b> ${pCutW} mm</td></tr>`;
         
         if (selGlass.value !== "0") {
-            htmlRows += `<tr><td style="padding-left:10px;">Stiklo matmenys:</td><td style="text-align:right;"><b>H:</b> ${gH} mm | <b>W:</b> ${gW} mm</td></tr>`;
+            htmlRows += `<tr><td style="padding-left:10px;">Stiklo matmenys:</td><td style="text-align:right;"><b>A:</b> ${gH} mm | <b>P:</b> ${gW} mm</td></tr>`;
         }
 
         if (hingesList.length > 0) {
