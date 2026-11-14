@@ -320,7 +320,7 @@
         </div>
 
         <div class="input-group">
-            <label>Pasirinkite Stiklą:</label>
+            <label>Pasirinkite stiklą:</label>
             <select id="stiklas" onchange="checkPleveleVisibility(); draw();">
                 <option value="22">Skaidrus (22€/m²)</option>
                 <option value="35">Optiwhite (35€/m²)</option>
@@ -342,7 +342,7 @@
             
             <label class="checkbox-wrapper" style="margin-top: 6px;">
                 <input type="checkbox" id="tempered-glass" onchange="draw()">
-                <span>Grūdintas (+15€/m² + šlifavimas 2.50€/m)</span>
+                <span>Grūdintas</span>
             </label>
         </div>
 
@@ -350,9 +350,9 @@
             <label>Pasirinkite plėvelę:</label>
             <select id="plevele" onchange="draw()">
                 <option value="0">Be plėvelės</option>
-                <option value="15">Apsauginė juoda be burbulų (+15€)</option>
-                <option value="15">Apsauginė balta be burbulų (+15€)</option>
-                <option value="15">Apsauginė pilka be burbulų (+15€)</option>
+                <option value="15">Apsauginė juoda užklijuota gražiai (+15€)</option>
+                <option value="15">Apsauginė balta užklijuota gražiai (+15€)</option>
+                <option value="15">Apsauginė pilka užklijuota gražiai (+15€)</option>
                 <option value="5">Apsauginė paprasta (+5€)</option>
             </select>
         </div>
@@ -360,7 +360,7 @@
         <div id="z23-special-wrapper">
             <label class="checkbox-wrapper" style="margin: 0;">
                 <input type="checkbox" id="z23-hidden-hinges" onchange="checkSpecial(); draw();">
-                <span>Naudoti paslėptus lankstus (kaip Z-24)</span>
+                <span>Naudoti paslėptus lankstus</span>
             </label>
         </div>
 
@@ -395,11 +395,11 @@
                     </select>
                 </div>
                 <div style="flex: 1;">
-                    <label>Atidarymo būdas:</label>
+                    <label>Lankstų tipas:</label>
                     <select id="hinge-action" onchange="draw()">
                         <option value="pritraukimas" id="opt-action-pritraukimas">Su pritraukimu</option>
                         <option value="tipon" id="opt-action-tipon">TIP-ON (atšokantis)</option>
-                        <option value="spyruokle" id="opt-action-spyruokle">Su spyruokle / be prit.</option>
+                        <option value="spyruokle" id="opt-action-spyruokle">Su spyruokle / be pritraukimo</option>
                     </select>
                 </div>
             </div>
@@ -620,9 +620,9 @@
         <div id="hinge-measurement-section">
             <label>Lankstų matavimas (min. 70 mm nuo krašto ir tarp lankstų):</label>
             <div class="mode-buttons">
-                <label><input type="radio" name="mode" value="virsus" onchange="updateInputs()"><span>Iš viršaus</span></label>
-                <label><input type="radio" name="mode" value="apacia" onchange="updateInputs()"><span>Iš apačios</span></label>
-                <label><input type="radio" name="mode" value="abu" onchange="updateInputs()"><span>Virš.+Apačia</span></label>
+                <label><input type="radio" name="mode" value="virsus" onchange="updateInputs()"><span>Nuo viršaus</span></label>
+                <label><input type="radio" name="mode" value="apacia" onchange="updateInputs()"><span>Nuo apačios</span></label>
+                <label><input type="radio" name="mode" value="abu" onchange="updateInputs()"><span>Viršus + apačia</span></label>
                 <label><input type="radio" name="mode" value="centruotai" checked onchange="updateInputs()"><span>Centruotai / Tolygiai</span></label>
             </div>
 
@@ -646,8 +646,8 @@
         <button class="btn-order" onclick="saveCurrentClient(); sendToGoogleSheets(); printOrder(); setTimeout(resetCalculator, 1000);">UŽSAKYTI / SPAUSDINTI VISKĄ</button>
         
         <div class="admin-bar">
-            <button class="btn-admin" onclick="openAdminBoardModal()">📋 Užsakymai & Archyvas</button>
-            <button class="btn-key" onclick="resetSecretToken()">🔑 Keisti raktą</button>
+            <button class="btn-admin" onclick="openAdminBoardModal()">Užsakymai</button>
+            <button class="btn-key" onclick="resetSecretToken()">Keisti raktą</button>
         </div>
     </div>
 
@@ -657,7 +657,7 @@
 <!-- MODALINIS LANGAS: UŽSAKYMAI, ARCHYVAS IR ATASKAITOS -->
 <div class="modal-overlay" id="admin-modal">
     <div class="modal-content">
-        <h3 style="margin-top:0; color:#2c3e50;">📋 Užsakymų Lenta, Archyvas & Ataskaitos</h3>
+        <h3 style="margin-top:0; color:#2c3e50;">Užsakymų lenta, archyvas, ataskaitos</h3>
         
         <div style="margin-bottom: 15px; border-bottom: 1px solid #ddd; padding-bottom: 10px;">
             <h4 style="margin: 0 0 8px 0; font-size: 13px; color: #34495e;">Ataskaitų eksportas:</h4>
@@ -666,9 +666,9 @@
                 <div style="flex:1;"><label>Iki:</label><input type="date" id="report-end-date"></div>
             </div>
             <div style="display: flex; gap: 6px;">
-                <button class="btn-add-cart" onclick="downloadReport('pjovimas')" style="background:#2980b9; margin-top:0;">📄 Pjovimas</button>
-                <button class="btn-add-cart" onclick="downloadReport('stiklai')" style="background:#8e44ad; margin-top:0;">🔍 Stiklai</button>
-                <button class="btn-add-cart" onclick="downloadReport('uzsakymai')" style="background:#27ae60; margin-top:0;">📊 Užsakymai</button>
+                <button class="btn-add-cart" onclick="downloadReport('pjovimas')" style="background:#2980b9; margin-top:0;">Pjovimas</button>
+                <button class="btn-add-cart" onclick="downloadReport('stiklai')" style="background:#8e44ad; margin-top:0;">Stiklai</button>
+                <button class="btn-add-cart" onclick="downloadReport('uzsakymai')" style="background:#27ae60; margin-top:0;">Užsakymai</button>
             </div>
         </div>
 
