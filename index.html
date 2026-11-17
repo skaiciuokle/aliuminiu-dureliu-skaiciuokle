@@ -744,6 +744,7 @@ const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw0dkSvbPhPp8
 
 let orderCart = [];
 let editingRowIndex = null;
+let loadedOrderFixedPrice = null;
 let allLoadedOrders = [];
 let currentTab = 'active';
 
@@ -1861,7 +1862,10 @@ function gatherCurrentConfigData() {
         shelfSummaryHtml = `<tr><td colspan="2"><b>Stiklo lentynėlės:</b> <span style="color:#2980b9; font-weight:bold;">${shelfDimsDesc} | ${shelfGlassDesc} | Kiekis: ${shelfQty} vnt.${edgesTxt}</span></td></tr>`;
     }
 
-    const totalOrderPrice = totalDoorsPrice + totalShelvesPrice;
+    let totalOrderPrice = totalDoorsPrice + totalShelvesPrice;
+    if (editingRowIndex !== null && loadedOrderFixedPrice !== null) {
+        totalOrderPrice = loadedOrderFixedPrice;
+    }
 
     let hingeText = hingeInfo.text;
     if (extraHingesPerDoor > 0) {
@@ -2321,6 +2325,8 @@ function resetCalculator() {
     const orderComment = document.getElementById('order-comment');
     if (orderComment) orderComment.value = '';
     
+    editingRowIndex = null;
+    loadedOrderFixedPrice = null;
     orderCart = [];
     updateCartUI();
     
@@ -2688,13 +2694,7 @@ function submitAndPrintOrder() {
 function loadOrderForEditing(encodedOrdStr) {
     const ord = JSON.parse(decodeURIComponent(encodedOrdStr));
     editingRowIndex = ord.rowIndex;
-
-    if (ord.price !== undefined) {
-        const priceInput = document.getElementById('kaina');
-        if (priceInput) {
-            priceInput.value = ord.price;
-        }
-    }
+    loadedOrderFixedPrice = (ord.price !== undefined && ord.price !== null && ord.price !== '') ? Number(ord.price) : null;
 
     if (ord.client) {
         let cName = ord.client;
@@ -2871,6 +2871,7 @@ function sendToGoogleSheets(prebuiltItems) {
     });
 
     editingRowIndex = null;
+    loadedOrderFixedPrice = null;
 }
 
 function printOrder(prebuiltItems) {
