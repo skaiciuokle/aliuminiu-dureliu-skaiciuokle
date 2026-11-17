@@ -703,6 +703,7 @@
                 <select id="bulk-status-select" style="width: 150px; padding: 4px; font-size: 11px;">
                     <option value="Naujas">Naujas</option>
                     <option value="Gamyboje">Gamyboje</option>
+                    <option value="Užsakytas stiklas">Užsakytas stiklas</option>
                     <option value="Baigtas">Baigtas</option>
                     <option value="Atšauktas">Atšauktas</option>
                     <option value="Archyvuotas">Archyvuotas</option>
@@ -2492,6 +2493,7 @@ function renderOrdersTable(orders) {
                 <td>
                     <select onchange="updateOrderStatus(${ord.rowIndex}, this.value)" style="padding:2px; font-size:11px; background:${statusColor}; color:white; border-radius:4px; font-weight:bold;">
                         <option value="Naujas" ${ord.status === 'Naujas' ? 'selected' : ''}>Naujas</option>
+                        <option value="Užsakytas stiklas" ${ord.status === 'Užsakytas stiklas' ? 'selected' : ''}>Užsakytas stiklas</option>
                         <option value="Gamyboje" ${ord.status === 'Gamyboje' ? 'selected' : ''}>Gamyboje</option>
                         <option value="Baigtas" ${ord.status === 'Baigtas' ? 'selected' : ''}>Baigtas</option>
                         <option value="Atšauktas" ${ord.status === 'Atšauktas' ? 'selected' : ''}>Atšauktas</option>
