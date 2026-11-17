@@ -2689,6 +2689,13 @@ function loadOrderForEditing(encodedOrdStr) {
     const ord = JSON.parse(decodeURIComponent(encodedOrdStr));
     editingRowIndex = ord.rowIndex;
 
+    if (ord.price !== undefined) {
+        const priceInput = document.getElementById('kaina');
+        if (priceInput) {
+            priceInput.value = ord.price;
+        }
+    }
+
     if (ord.client) {
         let cName = ord.client;
         let cPhone = "";
