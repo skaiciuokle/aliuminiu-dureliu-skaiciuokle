@@ -2309,6 +2309,15 @@ function resetCalculator() {
 
     const shelfQty = document.getElementById('shelf-qty');
     if (shelfQty) shelfQty.value = '0';
+
+    const shelfPolished = document.getElementById('shelf-polished');
+    const shelfGround = document.getElementById('shelf-ground');
+    const shelfTempered = document.getElementById('shelf-tempered');
+    const shelfEdgeWarning = document.getElementById('shelf-edge-warning');
+    if (shelfPolished) shelfPolished.checked = false;
+    if (shelfGround) shelfGround.checked = false;
+    if (shelfTempered) shelfTempered.checked = false;
+    if (shelfEdgeWarning) shelfEdgeWarning.style.display = 'none';
     
     const hasHandle = document.getElementById('has-handle');
     if (hasHandle) {
@@ -2688,7 +2697,7 @@ function submitAndPrintOrder() {
     saveCurrentClient();
     sendToGoogleSheets(items);
     printOrder(items);
-    setTimeout(resetCalculator, 1000);
+    resetCalculator();
 }
     
 function loadOrderForEditing(encodedOrdStr) {
