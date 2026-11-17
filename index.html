@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gamybos Skaičiuoklė</title>
+    <title>Gamybos skaičiuoklė</title>
     <style>
         body { 
             font-family: 'Segoe UI', sans-serif; 
@@ -224,7 +224,7 @@
         </div>
 
         <div class="input-group">
-            <label>Pasirinkite Profilį:</label>
+            <label>Pasirinkite profilį:</label>
             <select id="profilis" onchange="checkSpecial(); updateHingeOptions(); draw();">
                 <optgroup label="Z-1 (Atimtis: -18 mm)">
                     <option value="10" data-code="Z-1" data-nw="-27" data-nh="-28" data-cut-w="18" data-cut-h="18">Z-1 Aliuminis C-0 (10€/m)</option>
@@ -342,7 +342,7 @@
             
             <label class="checkbox-wrapper" style="margin-top: 6px;">
                 <input type="checkbox" id="tempered-glass" onchange="draw()">
-                <span>Grūdintas</span>
+                <span>Grūdintas (+15€/m² + šlifavimas 2.50€/m)</span>
             </label>
         </div>
 
@@ -350,9 +350,9 @@
             <label>Pasirinkite plėvelę:</label>
             <select id="plevele" onchange="draw()">
                 <option value="0">Be plėvelės</option>
-                <option value="15">Apsauginė juoda užklijuota gražiai (+15€)</option>
-                <option value="15">Apsauginė balta užklijuota gražiai (+15€)</option>
-                <option value="15">Apsauginė pilka užklijuota gražiai (+15€)</option>
+                <option value="15">Apsauginė juoda be burbulų (+15€)</option>
+                <option value="15">Apsauginė balta be burbulų (+15€)</option>
+                <option value="15">Apsauginė pilka be burbulų (+15€)</option>
                 <option value="5">Apsauginė paprasta (+5€)</option>
             </select>
         </div>
@@ -360,7 +360,7 @@
         <div id="z23-special-wrapper">
             <label class="checkbox-wrapper" style="margin: 0;">
                 <input type="checkbox" id="z23-hidden-hinges" onchange="checkSpecial(); draw();">
-                <span>Naudoti paslėptus lankstus</span>
+                <span>Naudoti paslėptus lankstus (kaip Z-24)</span>
             </label>
         </div>
 
@@ -395,11 +395,11 @@
                     </select>
                 </div>
                 <div style="flex: 1;">
-                    <label>Lankstų tipas:</label>
+                    <label>Lanksto tipas:</label>
                     <select id="hinge-action" onchange="draw()">
                         <option value="pritraukimas" id="opt-action-pritraukimas">Su pritraukimu</option>
                         <option value="tipon" id="opt-action-tipon">TIP-ON (atšokantis)</option>
-                        <option value="spyruokle" id="opt-action-spyruokle">Su spyruokle / be pritraukimo</option>
+                        <option value="spyruokle" id="opt-action-spyruokle">Su spyruokle / be prit.</option>
                     </select>
                 </div>
             </div>
@@ -620,9 +620,9 @@
         <div id="hinge-measurement-section">
             <label>Lankstų matavimas (min. 70 mm nuo krašto ir tarp lankstų):</label>
             <div class="mode-buttons">
-                <label><input type="radio" name="mode" value="virsus" onchange="updateInputs()"><span>Nuo viršaus</span></label>
-                <label><input type="radio" name="mode" value="apacia" onchange="updateInputs()"><span>Nuo apačios</span></label>
-                <label><input type="radio" name="mode" value="abu" onchange="updateInputs()"><span>Viršus + apačia</span></label>
+                <label><input type="radio" name="mode" value="virsus" onchange="updateInputs()"><span>Iš viršaus</span></label>
+                <label><input type="radio" name="mode" value="apacia" onchange="updateInputs()"><span>Iš apačios</span></label>
+                <label><input type="radio" name="mode" value="abu" onchange="updateInputs()"><span>Viršus/apačia</span></label>
                 <label><input type="radio" name="mode" value="centruotai" checked onchange="updateInputs()"><span>Centruotai / Tolygiai</span></label>
             </div>
 
@@ -643,10 +643,10 @@
             <div id="cart-items-list"></div>
         </div>
 
-        <button class="btn-order" onclick="saveCurrentClient(); sendToGoogleSheets(); printOrder(); setTimeout(resetCalculator, 1000);">UŽSAKYTI / SPAUSDINTI VISKĄ</button>
+        <button class="btn-order" onclick="submitAndPrintOrder()">UŽSAKYTI / SPAUSDINTI VISKĄ</button>
         
         <div class="admin-bar">
-            <button class="btn-admin" onclick="openAdminBoardModal()">Užsakymai</button>
+            <button class="btn-admin" onclick="openAdminBoardModal()">Užsakymai ir archyvas</button>
             <button class="btn-key" onclick="resetSecretToken()">Keisti raktą</button>
         </div>
     </div>
@@ -657,7 +657,7 @@
 <!-- MODALINIS LANGAS: UŽSAKYMAI, ARCHYVAS IR ATASKAITOS -->
 <div class="modal-overlay" id="admin-modal">
     <div class="modal-content">
-        <h3 style="margin-top:0; color:#2c3e50;">Užsakymų lenta, archyvas, ataskaitos</h3>
+        <h3 style="margin-top:0; color:#2c3e50;">Užsakymų lenta, archyvas ir ataskaitos</h3>
         
         <div style="margin-bottom: 15px; border-bottom: 1px solid #ddd; padding-bottom: 10px;">
             <h4 style="margin: 0 0 8px 0; font-size: 13px; color: #34495e;">Ataskaitų eksportas:</h4>
@@ -679,14 +679,26 @@
                 <button class="tab-btn" id="tab-archive-btn" onclick="switchTab('archive')">Archyvas</button>
             </div>
 
-            <div class="row" style="margin-bottom: 8px; align-items: center;">
-                <div style="flex: 2;">
-                    <input type="text" id="order-search-input" placeholder="Ieškoti pagal klientą, tel., miestą, profilį, matmenis..." oninput="filterOrdersTable()">
+            <div class="row" style="margin-bottom: 8px; align-items: flex-end; flex-wrap: wrap;">
+                <div style="flex: 2; min-width: 220px;">
+                    <label>Paieška:</label>
+                    <input type="text" id="order-search-input" placeholder="Ieškoti pagal klientą, tel., miestą, profilį, matmenis, komentarą..." oninput="filterOrdersTable()">
+                </div>
+                <div style="flex: 1; min-width: 125px;">
+                    <label>Data nuo:</label>
+                    <input type="date" id="board-start-date" onchange="filterOrdersTable()">
+                </div>
+                <div style="flex: 1; min-width: 125px;">
+                    <label>Data iki:</label>
+                    <input type="date" id="board-end-date" onchange="filterOrdersTable()">
+                </div>
+                <div style="flex: 0 0 auto;">
+                    <button type="button" onclick="clearBoardDateFilter()" style="padding: 6px 10px; background: #95a5a6; color: white; border: none; border-radius: 5px; font-size: 11px; font-weight: bold; cursor: pointer;">Išvalyti datas</button>
                 </div>
             </div>
 
             <!-- Masinių veiksmų juosta -->
-            <div class="bulk-actions-bar">
+            <div class="bulk-actions-bar" style="flex-wrap: wrap;">
                 <span style="font-size: 11px; font-weight: bold; color: #2c3e50;">Pažymėti veiksmai:</span>
                 <select id="bulk-status-select" style="width: 150px; padding: 4px; font-size: 11px;">
                     <option value="Naujas">Naujas</option>
@@ -696,6 +708,7 @@
                     <option value="Archyvuotas">Archyvuotas</option>
                 </select>
                 <button class="btn-add-cart" onclick="applyBulkStatus()" style="margin-top:0; width:auto; padding:5px 12px; font-size:11px;">Pakeisti pažymėtiems</button>
+                <button class="btn-add-cart" onclick="printSelectedOrdersFromBoard()" style="margin-top:0; width:auto; padding:5px 12px; font-size:11px; background:#27ae60;">🖨️ Spausdinti pažymėtus</button>
             </div>
 
             <div style="max-height: 350px; overflow-y: auto; margin-top: 8px;">
@@ -707,7 +720,7 @@
                             <th>Klientas</th>
                             <th>Miestas</th>
                             <th>Profilis ir matmenys</th>
-                            <th>Stiklas ir Lentynėlės</th>
+                            <th>Stiklas ir lentynėlės</th>
                             <th>Kiekis</th>
                             <th>Suma</th>
                             <th>Būsena</th>
@@ -729,6 +742,7 @@
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw0dkSvbPhPp8tIZ1gZuTTE9itNPM-pqNoS1kmVgsUIV0OFt-USut1qmF314WYfpVqApg/exec";
 
 let orderCart = [];
+let editingRowIndex = null;
 let allLoadedOrders = [];
 let currentTab = 'active';
 
@@ -1322,10 +1336,10 @@ function getMillingInstructionsHtml(hinges, hMain, hMirror, mainSide, qtyMain, q
         const sideLabel = side === 'kaire' ? 'Kairė' : 'Dešinė';
         
         let htmlRows = `<tr><td colspan="2" style="padding-top:2px; font-weight:bold; color:#004085;">Pusė: ${sideLabel} (${qty} vnt., Rėmas: ${totalH}x${totalW}mm)</td></tr>`;
-        htmlRows += `<tr><td style="padding-left:10px;">Profilio pjovimas:</td><td style="text-align:right;"><b>A:</b> ${pCutH} mm | <b>P:</b> ${pCutW} mm</td></tr>`;
+        htmlRows += `<tr><td style="padding-left:10px;">Profilio pjovimas:</td><td style="text-align:right;"><b>H:</b> ${pCutH} mm | <b>W:</b> ${pCutW} mm</td></tr>`;
         
         if (selGlass.value !== "0") {
-            htmlRows += `<tr><td style="padding-left:10px;">Stiklo matmenys:</td><td style="text-align:right;"><b>A:</b> ${gH} mm | <b>P:</b> ${gW} mm</td></tr>`;
+            htmlRows += `<tr><td style="padding-left:10px;">Stiklo matmenys:</td><td style="text-align:right;"><b>H:</b> ${gH} mm | <b>W:</b> ${gW} mm</td></tr>`;
         }
 
         if (hingesList.length > 0) {
@@ -1965,76 +1979,113 @@ function gatherCurrentConfigData() {
             </div>`;
     }
 
-    const summaryHtmlContent = `
-        <div class="result-card">
-            ${validationWarningHtml}
-            <table class="result-table">
-                <tr><td><b>Klientas:</b> ${clientName} ${clientPhone ? '(' + clientPhone + ')' : ''}</td><td style="text-align:right;"><b>Miestas:</b> ${selectedCity}</td></tr>
-                <tr><td><b>Data:</b> ${orderDateFormatted}</td><td style="text-align:right;"><b>Kiekis:</b> ${qtyDetailsText}</td></tr>
-                <tr><td colspan="2"><b>Profilis:</b> ${profileText}</td></tr>
-                ${dimsSummaryHtml}
-                ${glassSummaryHtml}
-                ${paintPerimeterHtml}
-                ${pleveleSummaryHtml}
-                <tr><td colspan="2"><b>Lankstai:</b> ${hingeText}</td></tr>
-                ${shelfSummaryHtml}
-                ${temperedTermHtml}
-                ${hasHandle ? `<tr><td colspan="2"><b>Skylės rankenėlei:</b> <span style="color:#d35400; font-weight:bold;">${handleInfoText}</span></td></tr>` : ''}
-                ${millingHandleInfoText}
-                ${priceBreakdownHtml}
-            </table>
-            ${hingeCodesHtml}
-            ${millingHtml}
-            ${commentHtml}
-        </div>
-    `;
+    const hasMainDoor = (h > 0 && w > 0 && qtyMain > 0);
+    const hasMirrorDoor = (mirror && hMirror > 0 && wMirror > 0 && qtyMirror > 0);
+    const hasDoorFrame = hasMainDoor || hasMirrorDoor;
+    const isShelvesOnly = (!hasDoorFrame && shelfQty > 0);
 
-    const maxW = Math.max(1, w, mirror ? wMirror : 0);
-    const maxH = Math.max(1, h, mirror ? hMirror : 0);
-    const scale = Math.min(250 / maxW, 320 / maxH);
+    let summaryHtmlContent = '';
+    let fullCardWithDrawings = '';
 
-    const tempDiv = document.createElement('div');
-    tempDiv.style.display = 'flex';
-    tempDiv.style.gap = '20px';
-    tempDiv.style.alignItems = 'flex-start';
+    if (isShelvesOnly) {
+        summaryHtmlContent = `
+            <div class="result-card">
+                <table class="result-table">
+                    <tr><td><b>Klientas:</b> ${clientName} ${clientPhone ? '(' + clientPhone + ')' : ''}</td><td style="text-align:right;"><b>Miestas:</b> ${selectedCity}</td></tr>
+                    <tr><td><b>Data:</b> ${orderDateFormatted}</td><td style="text-align:right;"><b>Kiekis:</b> ${shelfQty} vnt.</td></tr>
+                    <tr><td colspan="2"><b>Gaminys:</b> Tik stiklo lentynėlės (be rėmelio)</td></tr>
+                    ${shelfSummaryHtml}
+                    ${temperedTermHtml}
+                    ${priceBreakdownHtml}
+                </table>
+                ${commentHtml}
+            </div>
+        `;
+        fullCardWithDrawings = summaryHtmlContent;
+    } else {
+        summaryHtmlContent = `
+            <div class="result-card">
+                ${validationWarningHtml}
+                <table class="result-table">
+                    <tr><td><b>Klientas:</b> ${clientName} ${clientPhone ? '(' + clientPhone + ')' : ''}</td><td style="text-align:right;"><b>Miestas:</b> ${selectedCity}</td></tr>
+                    <tr><td><b>Data:</b> ${orderDateFormatted}</td><td style="text-align:right;"><b>Kiekis:</b> ${qtyDetailsText}</td></tr>
+                    <tr><td colspan="2"><b>Profilis:</b> ${profileText}</td></tr>
+                    ${dimsSummaryHtml}
+                    ${glassSummaryHtml}
+                    ${paintPerimeterHtml}
+                    ${pleveleSummaryHtml}
+                    <tr><td colspan="2"><b>Lankstai:</b> ${hingeText}</td></tr>
+                    ${shelfSummaryHtml}
+                    ${temperedTermHtml}
+                    ${hasHandle ? `<tr><td colspan="2"><b>Skylės rankenėlei:</b> <span style="color:#d35400; font-weight:bold;">${handleInfoText}</span></td></tr>` : ''}
+                    ${millingHandleInfoText}
+                    ${priceBreakdownHtml}
+                </table>
+                ${hingeCodesHtml}
+                ${millingHtml}
+                ${commentHtml}
+            </div>
+        `;
 
-    tempDiv.appendChild(createDrawing('Pagrindinė ('+mainSide+')', 'main', w, h, scale, mainSide, hinges, qtyMain, 'qtyMain', handleInfo, millingHandleInfo));
-    if (mirror) {
-        const otherSide = mainSide === 'kaire' ? 'desine' : 'kaire';
-        tempDiv.appendChild(createDrawing('Veidrodinė ('+otherSide+')', 'mirror', wMirror, hMirror, scale, otherSide, hinges, qtyMirror, 'qtyMirror', handleInfo, millingHandleInfo));
+        const maxW = Math.max(1, w, mirror ? wMirror : 0);
+        const maxH = Math.max(1, h, mirror ? hMirror : 0);
+        const scale = Math.min(250 / maxW, 320 / maxH);
+
+        const tempDiv = document.createElement('div');
+        tempDiv.style.display = 'flex';
+        tempDiv.style.gap = '20px';
+        tempDiv.style.alignItems = 'flex-start';
+
+        tempDiv.appendChild(createDrawing('Pagrindinė ('+mainSide+')', 'main', w, h, scale, mainSide, hinges, qtyMain, 'qtyMain', handleInfo, millingHandleInfo));
+        if (mirror) {
+            const otherSide = mainSide === 'kaire' ? 'desine' : 'kaire';
+            tempDiv.appendChild(createDrawing('Veidrodinė ('+otherSide+')', 'mirror', wMirror, hMirror, scale, otherSide, hinges, qtyMirror, 'qtyMirror', handleInfo, millingHandleInfo));
+        }
+
+        fullCardWithDrawings = summaryHtmlContent + `<div style="display:flex; gap:15px; justify-content:center; margin-top:15px; flex-wrap:wrap;">${tempDiv.innerHTML}</div>`;
     }
-
-    const fullCardWithDrawings = summaryHtmlContent + `<div style="display:flex; gap:15px; justify-content:center; margin-top:15px; flex-wrap:wrap;">${tempDiv.innerHTML}</div>`;
 
     let shelfInfoFullStr = shelfQty > 0 ? `${shelfQty} vnt., ${shelfDimsDesc}, ${shelfGlassDesc} (${shelfEdgesStr})` : 'Nėra';
 
     const configSnapshot = {
-        h: h,
-        w: w,
-        mirror: mirror,
-        hMirror: hMirror,
-        wMirror: wMirror,
-        qtyMain: qtyMain,
-        qtyMirror: qtyMirror,
+        shelvesOnly: isShelvesOnly,
+        h: isShelvesOnly ? 0 : h,
+        w: isShelvesOnly ? 0 : w,
+        mirror: isShelvesOnly ? false : mirror,
+        hMirror: isShelvesOnly ? 0 : hMirror,
+        wMirror: isShelvesOnly ? 0 : wMirror,
+        qtyMain: isShelvesOnly ? 0 : qtyMain,
+        qtyMirror: isShelvesOnly ? 0 : qtyMirror,
         mainSide: mainSide,
-        hinges: hinges,
-        handleInfo: handleInfo,
-        millingHandleInfo: millingHandleInfo,
-        summaryContent: summaryHtmlContent
+        hinges: isShelvesOnly ? [] : hinges,
+        hingeText: isShelvesOnly ? 'Nėra' : hingeText,
+        hingeCodes: isShelvesOnly ? ['', '', '', ''] : rawHingeCodes,
+        handleInfo: isShelvesOnly ? { active: false } : handleInfo,
+        millingHandleInfo: isShelvesOnly ? { active: false } : millingHandleInfo,
+        pleveleText: (!isShelvesOnly && plevelePrice > 0 && pleveleGroup.style.display !== 'none') ? selPleveleOpt.text : '',
+        paintPerimeterMm: (!isShelvesOnly && !isGlassMirror && !isGlassNone && glassM2Price > 0) ? paintPerimeterMm : 0,
+        isTemperedTerm: (hasAnyTempered || hasAnyPainted),
+        cutMinusW: isShelvesOnly ? 0 : cutMinusW,
+        cutMinusH: isShelvesOnly ? 0 : cutMinusH,
+        nw: isShelvesOnly ? 0 : nw,
+        nh: isShelvesOnly ? 0 : nh,
+        hasGlass: isShelvesOnly ? false : (selGlass.value !== "0")
     };
 
     return {
-        profileText: `${profileText} (${qtyDetailsText})`,
-        dimsShortTxt: dimsShortTxt,
-        qtyText: totalQty,
-        height: h,
-        width: w,
-        cutH: mainDoorCalc.pCutH,
-        cutW: mainDoorCalc.pCutW,
-        profileCode: selProf.dataset.code || "Z-1",
-        profileClean: profileText,
-        doorGlass: doorGlassDesc,
-        doorGlassDims: doorGlassDimsStr,
+        isShelvesOnly: isShelvesOnly,
+        hasDoorFrame: hasDoorFrame,
+        profileText: isShelvesOnly ? `Tik stiklo lentynėlės (${shelfQty} vnt.)` : `${profileText} (${qtyDetailsText})`,
+        dimsShortTxt: isShelvesOnly ? `Lentynėlės: ${shelfDimsDesc}` : dimsShortTxt,
+        qtyText: isShelvesOnly ? shelfQty : totalQty,
+        height: isShelvesOnly ? 0 : h,
+        width: isShelvesOnly ? 0 : w,
+        cutH: isShelvesOnly ? 0 : mainDoorCalc.pCutH,
+        cutW: isShelvesOnly ? 0 : mainDoorCalc.pCutW,
+        profileCode: isShelvesOnly ? "LENTYNĖLĖS" : (selProf.dataset.code || "Z-1"),
+        profileClean: isShelvesOnly ? "Tik stiklo lentynėlės" : profileText,
+        doorGlass: isShelvesOnly ? "Nėra" : doorGlassDesc,
+        doorGlassDims: isShelvesOnly ? "Nėra" : doorGlassDimsStr,
         shelfGlass: shelfGlassDesc,
         shelfDims: shelfDimsDesc,
         shelfThickness: shelfThicknessDesc,
@@ -2094,13 +2145,95 @@ function draw() {
     document.getElementById('preview-area').appendChild(previewContainer);
 }
 
-function addToCart() {
-    const config = gatherCurrentConfigData();
-    orderCart.push(config);
-    updateCartUI();
-    alert('Rėmelis sėkmingai pridėtas į krepšelį!');
+function getAllConfigItems() {
+    const cfg = gatherCurrentConfigData();
+    const mirror = document.getElementById('mirror').checked;
+    const h = doorDimensions.main.h;
+    const w = doorDimensions.main.w;
+    const hMirror = doorDimensions.mirror.h;
+    const wMirror = doorDimensions.mirror.w;
+    const qtyMain = parseInt(document.getElementById('qtyMain').value) || 0;
+    const qtyMirror = mirror ? (parseInt(document.getElementById('qtyMirror').value) || 0) : 0;
+    const shelfQty = parseInt(document.getElementById('shelf-qty').value) || 0;
+
+    const hasMain = (h > 0 && w > 0 && qtyMain > 0);
+    const hasMirror = (mirror && hMirror > 0 && wMirror > 0 && qtyMirror > 0);
+
+    if (!hasMain && !hasMirror && shelfQty <= 0) {
+        return [];
+    }
+
+    if (!hasMain && !hasMirror && shelfQty > 0) {
+        return [cfg];
+    }
+
+    if (mirror && hasMain && hasMirror) {
+        const origMirror = document.getElementById('mirror').checked;
+        const origMainH = doorDimensions.main.h;
+        const origMainW = doorDimensions.main.w;
+        const origQtyMain = document.getElementById('qtyMain').value;
+        const origPuse = document.getElementById('puse').value;
+        const origShelfQty = document.getElementById('shelf-qty').value;
+
+        document.getElementById('mirror').checked = false;
+        const mainItem = gatherCurrentConfigData();
+
+        const otherSide = origPuse === 'kaire' ? 'desine' : 'kaire';
+        doorDimensions.main.h = hMirror;
+        doorDimensions.main.w = wMirror;
+        document.getElementById('qtyMain').value = qtyMirror;
+        document.getElementById('puse').value = otherSide;
+        document.getElementById('shelf-qty').value = 0;
+        const mirrorItem = gatherCurrentConfigData();
+
+        document.getElementById('mirror').checked = origMirror;
+        doorDimensions.main.h = origMainH;
+        doorDimensions.main.w = origMainW;
+        document.getElementById('qtyMain').value = origQtyMain;
+        document.getElementById('puse').value = origPuse;
+        document.getElementById('shelf-qty').value = origShelfQty;
+
+        return [mainItem, mirrorItem];
+    }
+
+    if (mirror && !hasMain && hasMirror) {
+        const origMirror = document.getElementById('mirror').checked;
+        const origMainH = doorDimensions.main.h;
+        const origMainW = doorDimensions.main.w;
+        const origQtyMain = document.getElementById('qtyMain').value;
+        const origPuse = document.getElementById('puse').value;
+
+        const otherSide = origPuse === 'kaire' ? 'desine' : 'kaire';
+        document.getElementById('mirror').checked = false;
+        doorDimensions.main.h = hMirror;
+        doorDimensions.main.w = wMirror;
+        document.getElementById('qtyMain').value = qtyMirror;
+        document.getElementById('puse').value = otherSide;
+        const mirrorOnlyItem = gatherCurrentConfigData();
+
+        document.getElementById('mirror').checked = origMirror;
+        doorDimensions.main.h = origMainH;
+        doorDimensions.main.w = origMainW;
+        document.getElementById('qtyMain').value = origQtyMain;
+        document.getElementById('puse').value = origPuse;
+
+        return [mirrorOnlyItem];
+    }
+
+    return [cfg];
 }
 
+function addToCart() {
+    const items = getAllConfigItems();
+    if (items.length === 0) {
+        alert('Įveskite rėmelio matmenis arba stiklo lentynėlių kiekį!');
+        return;
+    }
+    items.forEach(item => orderCart.push(item));
+    updateCartUI();
+    const msg = items[0].isShelvesOnly ? 'Stiklo lentynėlės sėkmingai pridėtos į krepšelį!' : 'Gaminys (-iai) sėkmingai pridėti į krepšelį!';
+    alert(msg);
+}
 function removeFromCart(index) {
     orderCart.splice(index, 1);
     updateCartUI();
@@ -2279,6 +2412,47 @@ function fetchOrdersList(token) {
     });
 }
 
+function normalizeOrderDateToISO(rawDate) {
+    if (!rawDate) return '';
+    const str = String(rawDate).trim();
+    
+    const simpleMatch = str.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})$/);
+    if (simpleMatch) {
+        return `${simpleMatch[1]}-${simpleMatch[2].padStart(2, '0')}-${simpleMatch[3].padStart(2, '0')}`;
+    }
+
+    if (str.includes('T')) {
+        const parsed = new Date(str);
+        if (!isNaN(parsed.getTime())) {
+            const yyyy = parsed.getFullYear();
+            const mm = String(parsed.getMonth() + 1).padStart(2, '0');
+            const dd = String(parsed.getDate()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd}`;
+        }
+    }
+
+    const prefixMatch = str.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+    if (prefixMatch) {
+        return `${prefixMatch[1]}-${prefixMatch[2].padStart(2, '0')}-${prefixMatch[3].padStart(2, '0')}`;
+    }
+
+    return str;
+}
+
+function formatDisplayOrderDate(rawDate) {
+    const iso = normalizeOrderDateToISO(rawDate);
+    if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) {
+        return iso.replace(/-/g, '/');
+    }
+    return rawDate || '';
+}
+
+function clearBoardDateFilter() {
+    document.getElementById('board-start-date').value = '';
+    document.getElementById('board-end-date').value = '';
+    filterOrdersTable();
+}
+
 function switchTab(tab) {
     currentTab = tab;
     document.getElementById('tab-active-btn').className = tab === 'active' ? 'tab-btn active' : 'tab-btn';
@@ -2303,14 +2477,15 @@ function renderOrdersTable(orders) {
 
         const ordJson = encodeURIComponent(JSON.stringify(ord));
         const formattedPrice = parseFloat(ord.price || 0).toFixed(2);
+        const displayDate = formatDisplayOrderDate(ord.date);
 
         html += `
             <tr>
                 <td style="text-align:center;"><input type="checkbox" class="order-checkbox" value="${ord.rowIndex}"></td>
-                <td>${ord.date || ''}</td>
+                <td>${displayDate}</td>
                 <td><b>${ord.client || ''}</b></td>
                 <td>${ord.city || ''}</td>
-                <td><b>${ord.profileClean || ord.profile || ''}</b><br><span style="color:#555;">${ord.height || 0} x ${ord.width || 0} mm</span></td>
+                <td><b>${ord.profileClean || ord.profile || ''}</b><br><span style="color:#555;">${(Number(ord.height || 0) === 0 && Number(ord.width || 0) === 0) ? (ord.shelfDims || 'Tik lentynėlės') : `${ord.height || 0} x ${ord.width || 0} mm`}</span></td>
                 <td>Stiklas: <b>${ord.doorGlass || 'Nėra'}</b><br>Lentynėlės: <span style="color:#2980b9;">${ord.shelfInfo || 'Nėra'}</span></td>
                 <td><b>${ord.quantity || 0} vnt.</b></td>
                 <td><b>${formattedPrice} €</b></td>
@@ -2324,7 +2499,7 @@ function renderOrdersTable(orders) {
                     </select>
                 </td>
                 <td>
-                    <button class="btn-print-item" onclick="printSpecificOrderFromBoard('${ordJson}')">🖨️ Spausdinti</button>
+                    <button class="btn-print-item" style="background:#f39c12; margin-bottom:2px;" onclick="loadOrderForEditing('${ordJson}')">✏️ Redaguoti</button><br><button class="btn-print-item" onclick="printSpecificOrderFromBoard('${ordJson}')">🖨️ Spausdinti</button>
                     ${ord.status !== 'Archyvuotas' ? `<button class="btn-archive-item" onclick="updateOrderStatus(${ord.rowIndex}, 'Archyvuotas')">Archyvuoti</button>` : ''}
                     <button class="btn-remove-item" onclick="deleteOrder(${ord.rowIndex})">Ištrinti</button>
                 </td>
@@ -2336,6 +2511,8 @@ function renderOrdersTable(orders) {
 
 function filterOrdersTable() {
     const query = document.getElementById('order-search-input').value.toLowerCase().trim();
+    const startDate = document.getElementById('board-start-date').value;
+    const endDate = document.getElementById('board-end-date').value;
     
     const filteredByTab = allLoadedOrders.filter(ord => {
         const isArchived = (ord.status === 'Archyvuotas');
@@ -2344,11 +2521,16 @@ function filterOrdersTable() {
     });
 
     const filtered = filteredByTab.filter(ord => {
+        const ordIsoDate = normalizeOrderDateToISO(ord.date);
+        if (startDate && ordIsoDate && ordIsoDate < startDate) return false;
+        if (endDate && ordIsoDate && ordIsoDate > endDate) return false;
+
         const client = (ord.client || '').toLowerCase();
         const city = (ord.city || '').toLowerCase();
         const prof = (ord.profile || '').toLowerCase();
         const height = String(ord.height || '').toLowerCase();
         const width = String(ord.width || '').toLowerCase();
+        const comment = (ord.comment || '').toLowerCase();
         const doorGlassDims = (ord.doorGlassDims || '').toLowerCase();
         const shelfDims = (ord.shelfDims || '').toLowerCase();
         const doorGlass = (ord.doorGlass || '').toLowerCase();
@@ -2359,12 +2541,14 @@ function filterOrdersTable() {
                prof.includes(query) || 
                height.includes(query) || 
                width.includes(query) ||
+               comment.includes(query) ||
                doorGlassDims.includes(query) ||
                shelfDims.includes(query) ||
                doorGlass.includes(query) ||
                shelfGlass.includes(query);
     });
 
+    document.getElementById('select-all-checkbox').checked = false;
     renderOrdersTable(filtered);
 }
 
@@ -2487,7 +2671,163 @@ function downloadReport(reportType) {
     });
 }
 
-function sendToGoogleSheets() {
+function submitAndPrintOrder() {
+    let items = orderCart.length > 0 ? [...orderCart] : getAllConfigItems();
+    if (items.length === 0) {
+        alert('Įveskite rėmelio matmenis arba stiklo lentynėlių kiekį!');
+        return;
+    }
+    saveCurrentClient();
+    sendToGoogleSheets(items);
+    printOrder(items);
+    setTimeout(resetCalculator, 1000);
+}
+
+function loadOrderForEditing(encodedOrdStr) {
+    const ord = JSON.parse(decodeURIComponent(encodedOrdStr));
+    editingRowIndex = ord.rowIndex;
+
+    if (ord.client) {
+        let cName = ord.client;
+        let cPhone = "";
+        const match = ord.client.match(/^(.*?)\s*\(([^)]+)\)$/);
+        if (match) {
+            cName = match[1].trim();
+            cPhone = match[2].trim();
+        }
+        document.getElementById('client-name').value = cName;
+        document.getElementById('client-phone').value = cPhone;
+    }
+    if (ord.city) document.getElementById('miestas').value = ord.city;
+    if (ord.date) {
+        const isoDate = normalizeOrderDateToISO(ord.date);
+        if (isoDate) document.getElementById('order-date').value = isoDate;
+    }
+    if (ord.comment) document.getElementById('order-comment').value = ord.comment;
+
+    if (ord.configJson) {
+        try {
+            const cfg = JSON.parse(ord.configJson);
+            
+            if (ord.profileClean || ord.profile) {
+                const profSelect = document.getElementById('profilis');
+                const targetText = (ord.profileClean || ord.profile).toLowerCase();
+                for (let i = 0; i < profSelect.options.length; i++) {
+                    if (profSelect.options[i].text.toLowerCase().includes(targetText.split(' (')[0].trim())) {
+                        profSelect.selectedIndex = i;
+                        break;
+                    }
+                }
+                checkSpecial();
+                updateHingeOptions();
+            }
+
+            if (cfg.shelvesOnly) {
+                document.getElementById('h').value = 0;
+                document.getElementById('w').value = 0;
+                doorDimensions.main.h = 0;
+                doorDimensions.main.w = 0;
+            } else {
+                if (cfg.h !== undefined) {
+                    document.getElementById('h').value = cfg.h;
+                    doorDimensions.main.h = cfg.h;
+                }
+                if (cfg.w !== undefined) {
+                    document.getElementById('w').value = cfg.w;
+                    doorDimensions.main.w = cfg.w;
+                }
+                if (cfg.qtyMain !== undefined) document.getElementById('qtyMain').value = cfg.qtyMain;
+                if (cfg.mainSide) document.getElementById('puse').value = cfg.mainSide;
+                
+                if (cfg.mirror) {
+                    document.getElementById('mirror').checked = true;
+                    toggleMirror();
+                    if (cfg.hMirror !== undefined) doorDimensions.mirror.h = cfg.hMirror;
+                    if (cfg.wMirror !== undefined) doorDimensions.mirror.w = cfg.wMirror;
+                    if (cfg.qtyMirror !== undefined) document.getElementById('qtyMirror').value = cfg.qtyMirror;
+                } else {
+                    document.getElementById('mirror').checked = false;
+                    toggleMirror();
+                }
+            }
+
+            // ATSTATOME LENTYNĖLIŲ DUOMENIS TEISINGAI
+            const sQty = Number(ord.shelfQty) || (cfg.shelfQty) || 0;
+            document.getElementById('shelf-qty').value = sQty;
+            
+            if (sQty > 0) {
+                // Atstatome matmenis iš shelfDims (pvz. "300 x 400 mm")
+                const sDims = ord.shelfDims || cfg.shelfDims || "";
+                if (sDims) {
+                    const parts = sDims.replace(/mm/g, '').split('x');
+                    if (parts.length === 2) {
+                        document.getElementById('shelf-h').value = parseFloat(parts[0].trim()) || 300;
+                        document.getElementById('shelf-w').value = parseFloat(parts[1].trim()) || 400;
+                    }
+                }
+
+                // Atstatome stiklo storį
+                const sThick = ord.shelfThickness || cfg.shelfThickness || "";
+                if (sThick) {
+                    document.getElementById('shelf-glass-thickness').value = sThick;
+                }
+
+                // Atstatome stiklo tipą
+                const sGlass = ord.shelfGlass || cfg.shelfGlass || "";
+                if (sGlass) {
+                    const glassTypeSelect = document.getElementById('shelf-glass-type');
+                    for (let i = 0; i < glassTypeSelect.options.length; i++) {
+                        if (glassTypeSelect.options[i].text.toLowerCase().includes(sGlass.toLowerCase().trim())) {
+                            glassTypeSelect.selectedIndex = i;
+                            break;
+                        }
+                    }
+                }
+
+                // Atstatome briaunas / grūdinimą
+                const sEdges = ord.shelfEdges || cfg.shelfEdges || "";
+                if (sEdges) {
+                    document.getElementById('shelf-polished').checked = sEdges.includes('Poliruota');
+                    document.getElementById('shelf-ground').checked = sEdges.includes('Šlifuota');
+                    document.getElementById('shelf-tempered').checked = sEdges.includes('Grūdintas');
+                }
+            }
+
+            if (cfg.handleInfo && cfg.handleInfo.active) {
+                document.getElementById('has-handle').checked = true;
+                toggleHandleSection();
+                document.getElementById('handle-holes-count').value = cfg.handleInfo.count || 2;
+                updateHandleCCInputs();
+                if (cfg.handleInfo.ccs && cfg.handleInfo.ccs[0]) document.getElementById('handle-cc1').value = cfg.handleInfo.ccs[0];
+                if (cfg.handleInfo.ccs && cfg.handleInfo.ccs[1]) document.getElementById('handle-cc2').value = cfg.handleInfo.ccs[1];
+                if (cfg.handleInfo.ccs && cfg.handleInfo.ccs[2]) document.getElementById('handle-cc3').value = cfg.handleInfo.ccs[2];
+                document.getElementById('handle-ref-y').value = cfg.handleInfo.refY || 'apacia';
+                document.getElementById('handle-y-pos').value = cfg.handleInfo.yPos || 100;
+                document.getElementById('handle-x-pos').value = cfg.handleInfo.xPos || 35;
+                document.getElementById('handle-diameter').value = cfg.handleInfo.diameter || 7;
+            }
+
+            if (cfg.millingHandleInfo && cfg.millingHandleInfo.active) {
+                document.getElementById('has-milling-handle').checked = true;
+                toggleMillingHandleSection();
+                document.getElementById('milling-handle-model').value = cfg.millingHandleInfo.model || '';
+                document.getElementById('milling-handle-length').value = cfg.millingHandleInfo.length || 150;
+                document.getElementById('milling-handle-ref').value = cfg.millingHandleInfo.ref || 'apacia';
+                document.getElementById('milling-handle-pos').value = cfg.millingHandleInfo.pos || 100;
+                updateMillingHandleUI();
+            }
+
+        } catch (e) {
+            console.error("Klaida skaitant configJson redagavimui:", e);
+        }
+    }
+
+    closeAdminBoardModal();
+    draw();
+    alert(`Užsakymas (klientas: ${ord.client}) užkrautas redagavimui. Atlikę pakeitimus, paspauskite „UŽSAKYTI / SPAUSDINTI VISKĄ“.`);
+}
+
+function sendToGoogleSheets(prebuiltItems) {
     if(!GOOGLE_SCRIPT_URL) return;
 
     const clientInput = document.getElementById('client-name').value.trim();
@@ -2498,11 +2838,12 @@ function sendToGoogleSheets() {
     const userComment = document.getElementById('order-comment').value.trim();
     const secretToken = localStorage.getItem('gamyba_secret_token') || "";
 
-    let itemsToSave = orderCart.length > 0 ? orderCart : [gatherCurrentConfigData()];
+    let itemsToSave = prebuiltItems || (orderCart.length > 0 ? orderCart : getAllConfigItems());
 
     itemsToSave.forEach(item => {
         const payload = {
-            action: "saveData",
+            action: editingRowIndex !== null ? "updateData" : "saveData",
+            editRowIndex: editingRowIndex,
             secretToken: secretToken,
             orderDate: formattedDate,
             clientName: `${clientName} ${clientPhone ? '(' + clientPhone + ')' : ''}`,
@@ -2534,15 +2875,18 @@ function sendToGoogleSheets() {
         })
         .catch(err => console.error("Klaida siunčiant į Google Sheets:", err));
     });
+
+    editingRowIndex = null;
 }
 
-function printOrder() {
-    let itemsToPrint = orderCart.length > 0 ? [...orderCart] : [gatherCurrentConfigData()];
+function printOrder(prebuiltItems) {
+    let itemsToPrint = prebuiltItems || (orderCart.length > 0 ? [...orderCart] : getAllConfigItems());
     executePrintWindow(itemsToPrint, document.getElementById('client-name').value.trim() || 'Klientas', document.getElementById('client-phone').value.trim(), document.getElementById('miestas').value, getFormattedDisplayDate());
 }
 
-function printSpecificOrderFromBoard(encodedOrdStr) {
-    const ord = JSON.parse(decodeURIComponent(encodedOrdStr));
+function buildSimulatedPrintItem(ord) {
+    const formattedPrice = parseFloat(ord.price || 0).toFixed(2);
+    const displayDate = formatDisplayOrderDate(ord.date);
     
     let simulatedItem = {
         profileText: ord.profile || '',
@@ -2554,20 +2898,127 @@ function printSpecificOrderFromBoard(encodedOrdStr) {
     if (ord.configJson) {
         try {
             const cfg = JSON.parse(ord.configJson);
-            const scale = Math.min(250 / Math.max(1, cfg.w, cfg.mirror ? cfg.wMirror : 0), 320 / Math.max(1, cfg.h, cfg.mirror ? cfg.hMirror : 0));
             
-            const tempDiv = document.createElement('div');
-            tempDiv.style.display = 'flex';
-            tempDiv.style.gap = '20px';
-            tempDiv.style.alignItems = 'flex-start';
-
-            tempDiv.appendChild(createDrawing('Pagrindinė ('+cfg.mainSide+')', 'main', cfg.w, cfg.h, scale, cfg.mainSide, cfg.hinges, cfg.qtyMain, 'qtyMain', cfg.handleInfo, cfg.millingHandleInfo));
-            if (cfg.mirror) {
-                const otherSide = cfg.mainSide === 'kaire' ? 'desine' : 'kaire';
-                tempDiv.appendChild(createDrawing('Veidrodinė ('+otherSide+')', 'mirror', cfg.wMirror, cfg.hMirror, scale, otherSide, cfg.hinges, cfg.qtyMirror, 'qtyMirror', cfg.handleInfo, cfg.millingHandleInfo));
+            if (cfg.shelvesOnly || (Number(cfg.h || 0) === 0 && Number(cfg.w || 0) === 0 && ord.shelfInfo && ord.shelfInfo !== 'Nėra')) {
+                const commentHtml = ord.comment ? `<div class="comment-box"><b>Gamybos pastabos / komentaras:</b>${ord.comment.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>` : '';
+                simulatedItem.dimsShortTxt = `Lentynėlės: ${ord.shelfDims || ''}`;
+                simulatedItem.summaryHtml = `
+                    <div class="result-card">
+                        <table class="result-table">
+                            <tr><td><b>Klientas:</b> ${ord.client || ''}</td><td style="text-align:right;"><b>Miestas:</b> ${ord.city || ''}</td></tr>
+                            <tr><td><b>Data:</b> ${displayDate}</td><td style="text-align:right;"><b>Kiekis:</b> ${ord.quantity || 0} vnt.</td></tr>
+                            <tr><td colspan="2"><b>Gaminys:</b> Tik stiklo lentynėlės (be rėmelio)</td></tr>
+                            <tr><td colspan="2"><b>Stiklo lentynėlės:</b> <span style="color:#2980b9; font-weight:bold;">${ord.shelfInfo || 'Nėra'}</span></td></tr>
+                            ${cfg.isTemperedTerm ? `<tr><td colspan="2" style="color:#e67e22; font-weight:bold; padding-top:2px;">Gamybos terminas 3-4 savaitės</td></tr>` : ''}
+                            <tr><td colspan="2" style="text-align:right; padding-top:6px; border-top: 2px solid #2ecc71;" class="total-price">Viso: ${formattedPrice} €</td></tr>
+                        </table>
+                        ${commentHtml}
+                    </div>
+                `;
+                return simulatedItem;
             }
+            
+            if (cfg.summaryContent) {
+                const scale = Math.min(250 / Math.max(1, cfg.w, cfg.mirror ? cfg.wMirror : 0), 320 / Math.max(1, cfg.h, cfg.mirror ? cfg.hMirror : 0));
+                const tempDiv = document.createElement('div');
+                tempDiv.style.display = 'flex';
+                tempDiv.style.gap = '20px';
+                tempDiv.style.alignItems = 'flex-start';
 
-            simulatedItem.summaryHtml = cfg.summaryContent.split('<div style="display:flex;')[0] + `<div style="display:flex; gap:15px; justify-content:center; margin-top:15px; flex-wrap:wrap;">${tempDiv.innerHTML}</div>`;
+                tempDiv.appendChild(createDrawing('Pagrindinė ('+cfg.mainSide+')', 'main', cfg.w, cfg.h, scale, cfg.mainSide, cfg.hinges, cfg.qtyMain, 'qtyMain', cfg.handleInfo, cfg.millingHandleInfo));
+                if (cfg.mirror) {
+                    const otherSide = cfg.mainSide === 'kaire' ? 'desine' : 'kaire';
+                    tempDiv.appendChild(createDrawing('Veidrodinė ('+otherSide+')', 'mirror', cfg.wMirror, cfg.hMirror, scale, otherSide, cfg.hinges, cfg.qtyMirror, 'qtyMirror', cfg.handleInfo, cfg.millingHandleInfo));
+                }
+                simulatedItem.summaryHtml = cfg.summaryContent.split('<div style="display:flex;')[0] + `<div style="display:flex; gap:15px; justify-content:center; margin-top:15px; flex-wrap:wrap;">${tempDiv.innerHTML}</div>`;
+            } else {
+                const totalQty = (cfg.qtyMain || 0) + (cfg.mirror ? (cfg.qtyMirror || 0) : 0);
+                let qtyDetailsText = `${totalQty} vnt.`;
+                let dimsSummaryHtml = `<tr><td colspan="2"><b>Gaminio dydis:</b> <b style="font-size:13px; color:#000;">${cfg.h} x ${cfg.w} mm</b></td></tr>`;
+                
+                if (cfg.mirror) {
+                    const otherSide = cfg.mainSide === 'kaire' ? 'desine' : 'kaire';
+                    qtyDetailsText = `Viso: ${totalQty} vnt. (${cfg.qtyMain} ${cfg.mainSide}, ${cfg.qtyMirror} ${otherSide})`;
+                    dimsSummaryHtml = `<tr><td colspan="2"><b>Pagrindinės (${cfg.mainSide}):</b> ${cfg.h}x${cfg.w} mm (${cfg.qtyMain} vnt.) | <b>Veidrodinės (${otherSide}):</b> ${cfg.hMirror}x${cfg.wMirror} mm (${cfg.qtyMirror} vnt.)</td></tr>`;
+                }
+
+                let hingeCodesHtml = '';
+                const totalHingesCount = (cfg.hinges ? cfg.hinges.length : 0) * totalQty;
+                if (cfg.hingeCodes && cfg.hingeCodes.length > 0 && totalHingesCount > 0) {
+                    let codesList = [];
+                    if (cfg.hingeCodes[0]) codesList.push(`<li>Lanksto kodas: <b>${cfg.hingeCodes[0]}</b> — ${totalHingesCount} vnt.</li>`);
+                    if (cfg.hingeCodes[1]) codesList.push(`<li>Plokštelės kodas: <b>${cfg.hingeCodes[1]}</b> — ${totalHingesCount} vnt.</li>`);
+                    if (cfg.hingeCodes[2]) codesList.push(`<li>Logotipo kodas: <b>${cfg.hingeCodes[2]}</b> — ${totalHingesCount} vnt.</li>`);
+                    if (cfg.hingeCodes[3]) codesList.push(`<li>Dangtelio kodas: <b>${cfg.hingeCodes[3]}</b> — ${totalHingesCount} vnt.</li>`);
+                    if (codesList.length > 0) {
+                        hingeCodesHtml = `<div class="hinge-codes-box"><b>Reikalingos detalės (Viso lankstų kpl: ${totalHingesCount} vnt.):</b><ul>${codesList.join('')}</ul></div>`;
+                    }
+                }
+
+                let handleHtml = '';
+                if (cfg.handleInfo && cfg.handleInfo.active) {
+                    const hi = cfg.handleInfo;
+                    let ccsText = hi.ccs && hi.ccs.length > 0 ? ` | C-C: ${hi.ccs.join('/')} mm` : '';
+                    let posText = hi.refY === 'centras' ? 'Per vidurį' : (hi.refY === 'apacia' ? 'Apatinė skylė nuo apačios' : 'Viršutinė skylė nuo viršaus') + ' ' + hi.yPos + ' mm';
+                    handleHtml = `<tr><td colspan="2"><b>Skylės rankenėlei:</b> <span style="color:#d35400; font-weight:bold;">${hi.count} skylės Ø${hi.diameter} mm${ccsText} | ${posText} | Nuo krašto: ${hi.xPos} mm</span></td></tr>`;
+                }
+
+                let millingHandleHtml = '';
+                if (cfg.millingHandleInfo && cfg.millingHandleInfo.active) {
+                    const mi = cfg.millingHandleInfo;
+                    let posMillingText = mi.ref === 'centras' ? 'Per vidurį' : (mi.ref === 'apacia' ? 'Nuo apačios (centras) ' + mi.pos + ' mm' : 'Nuo viršaus (centras) ' + mi.pos + ' mm');
+                    millingHandleHtml = `<tr><td colspan="2"><b>Rankenėlės frezavimas:</b> <span style="color:#2980b9; font-weight:bold;">Modelis: ${mi.model} | Ilgis: ${mi.length} mm | ${posMillingText}</span></td></tr>`;
+                }
+
+                const mockProf = { dataset: { cutW: cfg.cutMinusW || 0, cutH: cfg.cutMinusH || 0, nw: cfg.nw || 0, nh: cfg.nh || 0 } };
+                const mockGlass = { value: cfg.hasGlass ? "1" : "0" };
+                const oldMainW = doorDimensions.main.w;
+                const oldMirrorW = doorDimensions.mirror.w;
+                doorDimensions.main.w = cfg.w;
+                doorDimensions.mirror.w = cfg.wMirror;
+                const millingHtml = getMillingInstructionsHtml(cfg.hinges || [], cfg.h, cfg.hMirror, cfg.mainSide, cfg.qtyMain, cfg.qtyMirror, cfg.mirror, mockProf, mockGlass);
+                doorDimensions.main.w = oldMainW;
+                doorDimensions.mirror.w = oldMirrorW;
+
+                const commentHtml = ord.comment ? `<div class="comment-box"><b>Gamybos pastabos / komentaras:</b>${ord.comment.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>` : '';
+
+                const summaryHtml = `
+                    <div class="result-card">
+                        <table class="result-table">
+                            <tr><td><b>Klientas:</b> ${ord.client || ''}</td><td style="text-align:right;"><b>Miestas:</b> ${ord.city || ''}</td></tr>
+                            <tr><td><b>Data:</b> ${displayDate}</td><td style="text-align:right;"><b>Kiekis:</b> ${ord.quantity || 0} vnt.</td></tr>
+                            <tr><td colspan="2"><b>Profilis:</b> ${ord.profileClean || ord.profile || ''}</td></tr>
+                            ${dimsSummaryHtml}
+                            <tr><td colspan="2"><b>Stiklas:</b> ${ord.doorGlass || 'Nėra'}</td></tr>
+                            ${cfg.paintPerimeterMm > 0 ? `<tr><td colspan="2"><b>Dažomas perimetras:</b> <span style="color:#2980b9; font-weight:bold;">${cfg.paintPerimeterMm} mm</span></td></tr>` : ''}
+                            ${cfg.pleveleText ? `<tr><td colspan="2"><b>Plėvelė:</b> ${cfg.pleveleText}</td></tr>` : ''}
+                            <tr><td colspan="2"><b>Lankstai:</b> ${cfg.hingeText || 'Nėra'}</td></tr>
+                            ${ord.shelfInfo && ord.shelfInfo !== 'Nėra' ? `<tr><td colspan="2"><b>Stiklo lentynėlės:</b> <span style="color:#2980b9; font-weight:bold;">${ord.shelfInfo}</span></td></tr>` : ''}
+                            ${cfg.isTemperedTerm ? `<tr><td colspan="2" style="color:#e67e22; font-weight:bold; padding-top:2px;">Gamybos terminas 3-4 savaitės</td></tr>` : ''}
+                            ${handleHtml}
+                            ${millingHandleHtml}
+                            <tr><td colspan="2" style="text-align:right; padding-top:6px; border-top: 2px solid #2ecc71;" class="total-price">Viso: ${formattedPrice} €</td></tr>
+                        </table>
+                        ${hingeCodesHtml}
+                        ${millingHtml}
+                        ${commentHtml}
+                    </div>
+                `;
+
+                const scale = Math.min(250 / Math.max(1, cfg.w, cfg.mirror ? cfg.wMirror : 0), 320 / Math.max(1, cfg.h, cfg.mirror ? cfg.hMirror : 0));
+                const tempDiv = document.createElement('div');
+                tempDiv.style.display = 'flex';
+                tempDiv.style.gap = '20px';
+                tempDiv.style.alignItems = 'flex-start';
+
+                tempDiv.appendChild(createDrawing('Pagrindinė ('+cfg.mainSide+')', 'main', cfg.w, cfg.h, scale, cfg.mainSide, cfg.hinges || [], cfg.qtyMain, 'qtyMain', cfg.handleInfo, cfg.millingHandleInfo));
+                if (cfg.mirror) {
+                    const otherSide = cfg.mainSide === 'kaire' ? 'desine' : 'kaire';
+                    tempDiv.appendChild(createDrawing('Veidrodinė ('+otherSide+')', 'mirror', cfg.wMirror, cfg.hMirror, scale, otherSide, cfg.hinges || [], cfg.qtyMirror, 'qtyMirror', cfg.handleInfo, cfg.millingHandleInfo));
+                }
+
+                simulatedItem.summaryHtml = summaryHtml + `<div style="display:flex; gap:15px; justify-content:center; margin-top:15px; flex-wrap:wrap;">${tempDiv.innerHTML}</div>`;
+            }
         } catch (e) {
             console.error("Klaida atkuriant brėžinį iš JSON:", e);
             simulatedItem.summaryHtml = `<div class="result-card"><p>Brėžinio nepavyko atkurti.</p></div>`;
@@ -2577,18 +3028,51 @@ function printSpecificOrderFromBoard(encodedOrdStr) {
             <div class="result-card">
                 <table class="result-table">
                     <tr><td><b>Klientas:</b> ${ord.client || ''}</td><td style="text-align:right;"><b>Miestas:</b> ${ord.city || ''}</td></tr>
-                    <tr><td><b>Data:</b> ${ord.date || ''}</td><td style="text-align:right;"><b>Kiekis:</b> ${ord.quantity || 0} vnt.</td></tr>
+                    <tr><td><b>Data:</b> ${displayDate}</td><td style="text-align:right;"><b>Kiekis:</b> ${ord.quantity || 0} vnt.</td></tr>
                     <tr><td colspan="2"><b>Profilis:</b> ${ord.profile || ''}</td></tr>
                     <tr><td colspan="2"><b>Gaminio dydis:</b> <b>${ord.height || 0} x ${ord.width || 0} mm</b></td></tr>
                     <tr><td colspan="2"><b>Stiklas:</b> ${ord.doorGlass || 'Nėra'} (${ord.doorGlassDims || ''})</td></tr>
                     <tr><td colspan="2"><b>Lentynėlės:</b> ${ord.shelfInfo || 'Nėra'}</td></tr>
-                    <tr><td colspan="2" style="text-align:right; padding-top:6px; border-top: 2px solid #2ecc71;" class="total-price">Viso: ${parseFloat(ord.price || 0).toFixed(2)} €</td></tr>
+                    <tr><td colspan="2" style="text-align:right; padding-top:6px; border-top: 2px solid #2ecc71;" class="total-price">Viso: ${formattedPrice} €</td></tr>
                 </table>
             </div>
         `;
     }
+    return simulatedItem;
+}
 
-    executePrintWindow([simulatedItem], ord.client || 'Klientas', '', ord.city || '', ord.date || '');
+function printSpecificOrderFromBoard(encodedOrdStr) {
+    const ord = JSON.parse(decodeURIComponent(encodedOrdStr));
+    const simulatedItem = buildSimulatedPrintItem(ord);
+    executePrintWindow([simulatedItem], ord.client || 'Klientas', '', ord.city || '', formatDisplayOrderDate(ord.date));
+}
+
+function printSelectedOrdersFromBoard() {
+    const checkboxes = document.querySelectorAll('.order-checkbox:checked');
+    if (checkboxes.length === 0) {
+        alert("Nepasirinkote jokių užsakymų spausdinimui!");
+        return;
+    }
+
+    const selectedRowIndices = Array.from(checkboxes).map(cb => String(cb.value));
+    const selectedOrders = allLoadedOrders.filter(ord => selectedRowIndices.includes(String(ord.rowIndex)));
+
+    if (selectedOrders.length === 0) {
+        alert("Nepavyko rasti pasirinktų užsakymų duomenų.");
+        return;
+    }
+
+    const simulatedItems = selectedOrders.map(ord => buildSimulatedPrintItem(ord));
+
+    const uniqueClients = [...new Set(selectedOrders.map(o => o.client).filter(Boolean))];
+    const uniqueCities = [...new Set(selectedOrders.map(o => o.city).filter(Boolean))];
+    const uniqueDates = [...new Set(selectedOrders.map(o => formatDisplayOrderDate(o.date)).filter(Boolean))];
+
+    const headerClient = uniqueClients.length === 1 ? uniqueClients[0] : `Keli klientai (${selectedOrders.length} poz.)`;
+    const headerCity = uniqueCities.length === 1 ? uniqueCities[0] : uniqueCities.join(', ');
+    const headerDate = uniqueDates.length === 1 ? uniqueDates[0] : `${uniqueDates[0]} – ${uniqueDates[uniqueDates.length - 1]}`;
+
+    executePrintWindow(simulatedItems, headerClient, '', headerCity, headerDate);
 }
 
 function executePrintWindow(itemsToPrint, clientName, clientPhone, selectedCity, orderDateVal) {
