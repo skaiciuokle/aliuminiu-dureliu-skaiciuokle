@@ -2684,7 +2684,7 @@ function submitAndPrintOrder() {
     printOrder(items);
     setTimeout(resetCalculator, 1000);
 }
-
+    
 function loadOrderForEditing(encodedOrdStr) {
     const ord = JSON.parse(decodeURIComponent(encodedOrdStr));
     editingRowIndex = ord.rowIndex;
@@ -2707,7 +2707,7 @@ function loadOrderForEditing(encodedOrdStr) {
     }
     if (ord.comment) document.getElementById('order-comment').value = ord.comment;
 
-    // 1. Atstatome pagrindinius rėmelio duomenis (jei tai ne tik lentynėlės)
+    // 1. Rėmelio duomenys
     if (ord.configJson) {
         try {
             const cfg = JSON.parse(ord.configJson);
@@ -2758,17 +2758,17 @@ function loadOrderForEditing(encodedOrdStr) {
         }
     }
 
-    // 2. ATSTATOME LENTYNĖLES TIESIAI IŠ GAUTŲ EILUTĖS DUOMENŲ (ord)
+    // 2. TIKSLUS LENTYNĖLIŲ ATSTATYMAS
     const shelfQtyVal = Number(ord.shelfQty) || 0;
     document.getElementById('shelf-qty').value = shelfQtyVal;
 
-    // Išvalome briaunas priešžymėjimui
+    // Išvalome briaunas
     document.getElementById('shelf-polished').checked = false;
     document.getElementById('shelf-ground').checked = false;
     document.getElementById('shelf-tempered').checked = false;
 
     if (shelfQtyVal > 0) {
-        // Matmenys (pvz. "300 x 400 mm" iš ord.shelfDims)
+        // Matmenys
         const sDims = ord.shelfDims || "";
         if (sDims) {
             const parts = sDims.replace(/mm/g, '').split('x');
@@ -2778,7 +2778,7 @@ function loadOrderForEditing(encodedOrdStr) {
             }
         }
 
-        // Storis (ord.shelfThickness)
+        // Storis
         const sThick = ord.shelfThickness || "";
         if (sThick) {
             const thickSelect = document.getElementById('shelf-glass-thickness');
@@ -2790,7 +2790,7 @@ function loadOrderForEditing(encodedOrdStr) {
             }
         }
 
-        // Stiklo tipas (ord.shelfGlass)
+        // Stiklo tipas
         const sGlass = ord.shelfGlass || "";
         if (sGlass) {
             const glassTypeSelect = document.getElementById('shelf-glass-type');
@@ -2802,11 +2802,11 @@ function loadOrderForEditing(encodedOrdStr) {
             }
         }
 
-        // Kraštinės ir grūdinimas (iš shelfInfo arba papildomų duomenų)
-        const shelfInfoFull = ord.shelfInfo || "";
-        document.getElementById('shelf-polished').checked = shelfInfoFull.toLowerCase().includes('poliruota');
-        document.getElementById('shelf-ground').checked = shelfInfoFull.toLowerCase().includes('šlifuota');
-        document.getElementById('shelf-tempered').checked = shelfInfoFull.toLowerCase().includes('grūdintas');
+        // Briaunos ir grūdinimas (tikriname tiek ord.shelfEdges, tiek shelfInfo)
+        const edgesText = (ord.shelfEdges || "") + " " + (ord.shelfInfo || "");
+        document.getElementById('shelf-polished').checked = edgesText.toLowerCase().includes('poliruota');
+        document.getElementById('shelf-ground').checked = edgesText.toLowerCase().includes('šlifuota');
+        document.getElementById('shelf-tempered').checked = edgesText.toLowerCase().includes('grūdintas');
     }
 
     closeAdminBoardModal();
