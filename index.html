@@ -1690,8 +1690,18 @@ function gatherCurrentConfigData() {
     const isGlassMirror = selGlassText.includes('veidrodis');
     const isGlassNone = selGlass.value === "0";
 
+    const profileCode = selProf.dataset.code || "";
+    const profileColor = profileText.split(' (')[0].replace(profileCode, '').trim();
+
     let doorGlassDesc = selGlass.text.split(' (')[0];
-    if (isTempered && !isGlassNone) doorGlassDesc += " (Grūdintas)";
+    let glassExtras = [];
+    if (isTempered && !isGlassNone) glassExtras.push("Grūdintas");
+    if (!isGlassMirror && !isGlassNone && paintPerimeterMm > 0) {
+        glassExtras.push(`dažomas perimetras: ${paintPerimeterMm} mm, spalva: ${profileColor}`);
+    }
+    if (glassExtras.length > 0) {
+        doorGlassDesc += ` (${glassExtras.join(', ')})`;
+    }
 
     const pleveleGroup = document.getElementById('plevele-group');
     const selPlevele = document.getElementById('plevele');
