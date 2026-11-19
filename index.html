@@ -1696,6 +1696,7 @@ function gatherCurrentConfigData() {
     let doorGlassDesc = selGlass.text.split(' (')[0];
     let glassExtras = [];
     if (isTempered && !isGlassNone) glassExtras.push("Grūdintas");
+    if (requiresGlassPolishing && !isGlassNone) glassExtras.push("Poliruotas");
     if (!isGlassMirror && !isGlassNone && paintPerimeterMm > 0) {
         glassExtras.push(`dažomas perimetras: ${paintPerimeterMm} mm, spalva: ${profileColor}`);
     }
