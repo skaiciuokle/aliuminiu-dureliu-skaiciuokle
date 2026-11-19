@@ -156,6 +156,27 @@
         .btn-print-item:hover { background: #2471a3; }
         .btn-order { width: 100%; margin-top: 10px; padding: 10px; background: #27ae60; color: white; font-size: 14px; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; transition: background 0.2s; }
         .btn-order:hover { background: #219150; }
+        .btn-order.print-only { background: #34495e; }
+        .btn-order.print-only:hover { background: #2c3e50; }
+
+        .token-status-badge {
+            margin-top: 5px;
+            font-size: 11px;
+            font-weight: 600;
+            text-align: center;
+            padding: 4px 8px;
+            border-radius: 5px;
+        }
+        .token-status-badge.unlocked {
+            background: #e8f8f0;
+            color: #1e8449;
+            border: 1px solid #a9dfbf;
+        }
+        .token-status-badge.locked {
+            background: #f4f6f7;
+            color: #566573;
+            border: 1px solid #d5dbdb;
+        }
 
         .admin-bar { display: flex; gap: 6px; margin-top: 8px; }
         .btn-admin { flex: 2; padding: 8px; background: #34495e; color: white; font-size: 11px; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; }
@@ -183,7 +204,7 @@
                 -webkit-print-color-adjust: exact; 
                 print-color-adjust: exact; 
             }
-            .controls, .preview-area, .btn-add-cart, .btn-order, .cart-container, .admin-bar { display: none !important; }
+            .controls, .preview-area, .btn-add-cart, .btn-order, .cart-container, .admin-bar, .token-status-badge { display: none !important; }
         }
     </style>
 </head>
@@ -643,11 +664,12 @@
             <div id="cart-items-list"></div>
         </div>
 
-        <button class="btn-order" onclick="submitAndPrintOrder()">UŽSAKYTI / SPAUSDINTI VISKĄ</button>
+        <button class="btn-order" id="submit-order-btn" onclick="submitAndPrintOrder()">UŽSAKYTI / SPAUSDINTI VISKĄ</button>
+        <div class="token-status-badge locked" id="token-status-badge">Raktas neįvestas — užsakymai tik spausdinami</div>
         
         <div class="admin-bar">
             <button class="btn-admin" onclick="openAdminBoardModal()">Užsakymai ir archyvas</button>
-            <button class="btn-key" onclick="resetSecretToken()">Keisti raktą</button>
+            <button class="btn-key" onclick="promptOrResetSecretToken()">Slaptažodis / Raktas</button>
         </div>
     </div>
 
@@ -747,6 +769,57 @@ let editingRowIndex = null;
 let loadedOrderFixedPrice = null;
 let allLoadedOrders = [];
 let currentTab = 'active';
+
+function getSavedSecretToken() {
+    const t = localStorage.getItem('gamyba_secret_token');
+    return t ? t.trim() : "";
+}
+
+function updateTokenUIStatus() {
+    const hasToken = !!getSavedSecretToken();
+    const badge = document.getElementById('token-status-badge');
+    const btn = document.getElementById('submit-order-btn');
+
+    if (badge) {
+        if (hasToken) {
+            badge.className = 'token-status-badge unlocked';
+            badge.textContent = 'Slaptažodis aktyvus — užsakymai bus įrašomi į lentą ir spausdinami';
+        } else {
+            badge.className = 'token-status-badge locked';
+            badge.textContent = 'Raktas neįvestas — užsakymai tik spausdinami';
+        }
+    }
+
+    if (btn) {
+        if (hasToken) {
+            btn.classList.remove('print-only');
+            btn.textContent = editingRowIndex !== null ? 'ATNAUJINTI LENTOJE IR SPAUSDINTI' : 'UŽSAKYTI / SPAUSDINTI VISKĄ';
+        } else {
+            btn.classList.add('print-only');
+            btn.textContent = 'SPAUSDINTI UŽSAKYMĄ';
+        }
+    }
+}
+
+function promptOrResetSecretToken() {
+    const current = getSavedSecretToken();
+    if (current) {
+        const choice = confirm("Slaptažodis šiuo metu ĮVESTAS.\n\nSpauskite OK, jei norite jį IŠTRINTI (kad užsakymai tik spausdintųsi).\nSpauskite Atšaukti, jei norite įvesti naują.");
+        if (choice) {
+            localStorage.removeItem('gamyba_secret_token');
+            updateTokenUIStatus();
+            alert("Slaptažodis ištrintas. Nuo šiol užsakymai bus tik spausdinami.");
+            return;
+        }
+    }
+
+    const entered = prompt("Įveskite slaptažodį (kad užsakymai kristų į užsakymų lentą):");
+    if (entered && entered.trim() !== "") {
+        localStorage.setItem('gamyba_secret_token', entered.trim());
+        updateTokenUIStatus();
+        alert("Slaptažodis išsaugotas.");
+    }
+}
 
 function setTodayDateInput() {
     const today = new Date();
@@ -886,7 +959,9 @@ function toggleHandleSection() {
     const hasHandle = document.getElementById('has-handle').checked;
     document.getElementById('handle-details').style.display = hasHandle ? 'block' : 'none';
     if (hasHandle) {
-        document.getElementById('handle-diameter').value = 7;
+        if (!document.getElementById('handle-diameter').value) {
+            document.getElementById('handle-diameter').value = 7;
+        }
         updateHandleCCInputs();
     }
     draw();
@@ -989,26 +1064,26 @@ function toggleMirror() {
     draw();
 }
 
-function updateInputs() {
+function updateInputs(savedValues = null) {
     const mode = document.querySelector('input[name="mode"]:checked').value;
     const container = document.getElementById('inputs-container');
     container.innerHTML = '';
     if (mode === 'virsus') {
-        container.innerHTML = `<label>Pozicijos nuo viršaus:</label><input type="text" id="pozV" value="" placeholder="pvz. 100, 620" oninput="draw()">`;
+        container.innerHTML = `<label>Pozicijos nuo viršaus:</label><input type="text" id="pozV" value="${savedValues?.pozV || ''}" placeholder="pvz. 100, 620" oninput="draw()">`;
     } else if (mode === 'apacia') {
-        container.innerHTML = `<label>Pozicijos nuo apačios:</label><input type="text" id="pozA" value="" placeholder="pvz. 100, 620" oninput="draw()">`;
+        container.innerHTML = `<label>Pozicijos nuo apačios:</label><input type="text" id="pozA" value="${savedValues?.pozA || ''}" placeholder="pvz. 100, 620" oninput="draw()">`;
     } else if (mode === 'abu') {
-        container.innerHTML = `<label>Pozicijos nuo kraštų (V ir A):</label><input type="text" id="pozAB" value="" placeholder="pvz. 100, 620" oninput="draw()">`;
+        container.innerHTML = `<label>Pozicijos nuo kraštų (V ir A):</label><input type="text" id="pozAB" value="${savedValues?.pozAB || ''}" placeholder="pvz. 100, 620" oninput="draw()">`;
     } else if (mode === 'centruotai') {
         container.innerHTML = `
             <div class="row" style="margin-top: 4px;">
                 <div style="flex:1;">
                     <label>Atstumas nuo krašto (mm):</label>
-                    <input type="number" id="pozEdge" value="100" min="70" oninput="draw()">
+                    <input type="number" id="pozEdge" value="${savedValues?.pozEdge || 100}" min="70" oninput="draw()">
                 </div>
                 <div style="flex:1;">
                     <label>Lankstų kiekis (vnt.):</label>
-                    <input type="number" id="pozCount" value="4" min="2" max="10" oninput="draw()">
+                    <input type="number" id="pozCount" value="${savedValues?.pozCount || 4}" min="2" max="10" oninput="draw()">
                 </div>
             </div>
         `;
@@ -1061,7 +1136,7 @@ function createDrawing(label, doorKey, w, h, scale, side, hinges, currentQty, qt
     box.style.height = (drawH * scale) + 'px';
 
     if (w > 0 && h > 0) {
-        hinges.forEach(hng => {
+        (hinges || []).forEach(hng => {
             const val = hng.val;
             const type = hng.type;
             if (isNaN(val) || val <= 0) return;
@@ -1090,7 +1165,7 @@ function createDrawing(label, doorKey, w, h, scale, side, hinges, currentQty, qt
 
         if (handleInfo && handleInfo.active) {
             let xPx = (side === 'kaire') ? ((w - handleInfo.xPos) * scale) : (handleInfo.xPos * scale);
-            let ccs = handleInfo.ccs;
+            let ccs = handleInfo.ccs || [];
             let totalSpan = ccs.reduce((a, b) => a + b, 0);
 
             let holeYPositions = [];
@@ -1294,7 +1369,7 @@ function createDrawing(label, doorKey, w, h, scale, side, hinges, currentQty, qt
 
 function calculateAbsoluteHingesFromTop(hinges, totalH) {
     let absoluteArr = [];
-    hinges.forEach(hng => {
+    (hinges || []).forEach(hng => {
         if (isNaN(hng.val) || hng.val <= 0) return;
         let absTop = (hng.type === 'V') ? hng.val : (totalH - hng.val);
         if (absTop >= 0 && absTop <= totalH) {
@@ -1307,8 +1382,8 @@ function calculateAbsoluteHingesFromTop(hinges, totalH) {
 function getMillingInstructionsHtml(hinges, hMain, hMirror, mainSide, qtyMain, qtyMirror, isMirrorActive, selProf, selGlass) {
     const cutMinusW = parseFloat(selProf.dataset.cutW || "0");
     const cutMinusH = parseFloat(selProf.dataset.cutH || "0");
-    const nw = parseInt(selProf.dataset.nw);
-    const nh = parseInt(selProf.dataset.nh);
+    const nw = parseInt(selProf.dataset.nw || 0);
+    const nh = parseInt(selProf.dataset.nh || 0);
 
     function buildTableForDoor(side, qty, totalH, totalW) {
         if (qty <= 0 || totalH <= 0 || totalW <= 0) return '';
@@ -1375,10 +1450,10 @@ function getHingeDetails() {
     const isZ23 = /(^|\s)Z-23(\s|$)/.test(selProfText);
     const isZ23Hidden = isZ23 && document.getElementById('z23-hidden-hinges').checked;
     
-    if (isExcludedHingeProfile || isZ24 || isZ23Hidden) return { text: 'Nėra (kitokie lankstai)', price: 0, codes: ['', '', ''] };
+    if (isExcludedHingeProfile || isZ24 || isZ23Hidden) return { text: 'Nėra (kitokie lankstai)', price: 0, codes: ['', '', '', ''] };
 
     const maker = document.getElementById('hinge-maker').value;
-    if (maker === 'none') return { text: 'Be lankstų komplekto', price: 0, codes: ['', '', ''] };
+    if (maker === 'none') return { text: 'Be lankstų komplekto', price: 0, codes: ['', '', '', ''] };
 
     const color = document.getElementById('hinge-color').value; 
     const mount = document.getElementById('hinge-mount').value; 
@@ -1552,13 +1627,15 @@ function gatherCurrentConfigData() {
 
     let hinges = [];
     let validationWarning = "";
+    const mode = document.querySelector('input[name="mode"]:checked').value;
+    let hingeRawState = { mode };
 
     if (!isZ24 && !isZ23Hidden) {
-        const mode = document.querySelector('input[name="mode"]:checked').value;
-        
         if (mode === 'centruotai') {
             const edgeVal = parseFloat(document.getElementById('pozEdge')?.value) || 100;
             const countVal = parseInt(document.getElementById('pozCount')?.value) || 4;
+            hingeRawState.pozEdge = edgeVal;
+            hingeRawState.pozCount = countVal;
 
             if (edgeVal < 70) {
                 validationWarning = `Dėmesio: Kraštinis atstumas (${edgeVal} mm) yra mažesnis nei 70 mm!`;
@@ -1589,10 +1666,13 @@ function gatherCurrentConfigData() {
             let rawInput = "";
             if (mode === 'virsus') {
                 rawInput = document.getElementById('pozV')?.value || "";
+                hingeRawState.pozV = rawInput;
             } else if (mode === 'apacia') {
                 rawInput = document.getElementById('pozA')?.value || "";
+                hingeRawState.pozA = rawInput;
             } else {
                 rawInput = document.getElementById('pozAB')?.value || "";
+                hingeRawState.pozAB = rawInput;
             }
 
             let parsedValues = [];
@@ -1656,6 +1736,9 @@ function gatherCurrentConfigData() {
         active: hasHandle,
         count: handleHolesCount,
         ccs: ccs,
+        cc1: cc1,
+        cc2: cc2,
+        cc3: cc3,
         refY: handleRefY,
         yPos: handleYPos,
         xPos: handleXPos,
@@ -2074,6 +2157,16 @@ function gatherCurrentConfigData() {
         qtyMirror: isShelvesOnly ? 0 : qtyMirror,
         mainSide: mainSide,
         hinges: isShelvesOnly ? [] : hinges,
+        hingeRawState: hingeRawState,
+        hingeMaker: document.getElementById('hinge-maker').value,
+        hingeColor: document.getElementById('hinge-color').value,
+        hingeMount: document.getElementById('hinge-mount').value,
+        hingeAction: document.getElementById('hinge-action').value,
+        hingePlate: document.getElementById('hinge-plate').value,
+        z23Hidden: isZ23Hidden,
+        z24Type: document.getElementById('z24-type').value,
+        isTempered: isTempered,
+        pleveleValue: selPlevele.value,
         hingeText: isShelvesOnly ? 'Nėra' : hingeText,
         hingeCodes: isShelvesOnly ? ['', '', '', ''] : rawHingeCodes,
         handleInfo: isShelvesOnly ? { active: false } : handleInfo,
@@ -2250,6 +2343,7 @@ function addToCart() {
     const msg = items[0].isShelvesOnly ? 'Stiklo lentynėlės sėkmingai pridėtos į krepšelį!' : 'Gaminys (-iai) sėkmingai pridėti į krepšelį!';
     alert(msg);
 }
+
 function removeFromCart(index) {
     orderCart.splice(index, 1);
     updateCartUI();
@@ -2314,9 +2408,18 @@ function resetCalculator() {
     const profilis = document.getElementById('profilis');
     const stiklas = document.getElementById('stiklas');
     const tempered = document.getElementById('tempered-glass');
+    const z23Hidden = document.getElementById('z23-hidden-hinges');
     if (profilis) profilis.selectedIndex = 0;
     if (stiklas) stiklas.selectedIndex = 0;
     if (tempered) tempered.checked = false;
+    if (z23Hidden) z23Hidden.checked = false;
+
+    document.getElementById('hinge-maker').value = 'none';
+    document.getElementById('hinge-color').value = 'baltas';
+    document.getElementById('hinge-mount').value = 'isorinis';
+    document.getElementById('hinge-action').value = 'pritraukimas';
+    document.getElementById('hinge-plate').value = 'kryzmine';
+    document.getElementById('z24-type').value = '55';
 
     const shelfQty = document.getElementById('shelf-qty');
     if (shelfQty) shelfQty.value = '0';
@@ -2349,6 +2452,7 @@ function resetCalculator() {
     loadedOrderFixedPrice = null;
     orderCart = [];
     updateCartUI();
+    updateTokenUIStatus();
     
     setTodayDateInput();
     checkSpecial();
@@ -2365,22 +2469,18 @@ function resetCalculator() {
 }
 
 function getOrRequestSecretToken() {
-    let token = localStorage.getItem('gamyba_secret_token');
+    let token = getSavedSecretToken();
     if (!token) {
         token = prompt("Įveskite slaptąjį gamybos raktą:");
         if (token && token.trim() !== "") {
             token = token.trim();
             localStorage.setItem('gamyba_secret_token', token);
+            updateTokenUIStatus();
         } else {
             return null;
         }
     }
     return token;
-}
-
-function resetSecretToken() {
-    localStorage.removeItem('gamyba_secret_token');
-    alert("Slaptasis raktas ištrintas iš šio įrenginio.");
 }
 
 function openAdminBoardModal() {
@@ -2407,6 +2507,7 @@ function openAdminBoardModal() {
         } else {
             alert("Neteisingas raktas!");
             localStorage.removeItem('gamyba_secret_token');
+            updateTokenUIStatus();
         }
     })
     .catch(err => {
@@ -2705,8 +2806,11 @@ function submitAndPrintOrder() {
         alert('Įveskite rėmelio matmenis arba stiklo lentynėlių kiekį!');
         return;
     }
+    const secretToken = getSavedSecretToken();
     saveCurrentClient();
-    sendToGoogleSheets(items);
+    if (secretToken) {
+        sendToGoogleSheets(items, secretToken);
+    }
     printOrder(items);
     resetCalculator();
 }
@@ -2732,9 +2836,15 @@ function loadOrderForEditing(encodedOrdStr) {
         const isoDate = normalizeOrderDateToISO(ord.date);
         if (isoDate) document.getElementById('order-date').value = isoDate;
     }
-    if (ord.comment) document.getElementById('order-comment').value = ord.comment;
+    document.getElementById('order-comment').value = ord.comment || '';
 
-    // 1. Rėmelio duomenys
+    document.getElementById('tempered-glass').checked = false;
+    document.getElementById('z23-hidden-hinges').checked = false;
+    document.getElementById('has-handle').checked = false;
+    document.getElementById('has-milling-handle').checked = false;
+    toggleHandleSection();
+    toggleMillingHandleSection();
+
     if (ord.configJson) {
         try {
             const cfg = JSON.parse(ord.configJson);
@@ -2748,8 +2858,60 @@ function loadOrderForEditing(encodedOrdStr) {
                         break;
                     }
                 }
-                checkSpecial();
-                updateHingeOptions();
+            }
+
+            if (cfg.z23Hidden !== undefined) {
+                document.getElementById('z23-hidden-hinges').checked = !!cfg.z23Hidden;
+            }
+            if (cfg.z24Type !== undefined) {
+                document.getElementById('z24-type').value = cfg.z24Type;
+            }
+            if (cfg.isTempered !== undefined) {
+                document.getElementById('tempered-glass').checked = !!cfg.isTempered;
+            }
+
+            checkSpecial();
+            updateHingeOptions();
+
+            if (cfg.hingeMaker) document.getElementById('hinge-maker').value = cfg.hingeMaker;
+            if (cfg.hingeColor) document.getElementById('hinge-color').value = cfg.hingeColor;
+            if (cfg.hingeMount) document.getElementById('hinge-mount').value = cfg.hingeMount;
+            if (cfg.hingeAction) document.getElementById('hinge-action').value = cfg.hingeAction;
+            if (cfg.hingePlate) document.getElementById('hinge-plate').value = cfg.hingePlate;
+            updateHingeOptions();
+
+            if (cfg.hingeRawState && cfg.hingeRawState.mode) {
+                const modeRadio = document.querySelector(`input[name="mode"][value="${cfg.hingeRawState.mode}"]`);
+                if (modeRadio) {
+                    modeRadio.checked = true;
+                    updateInputs(cfg.hingeRawState);
+                }
+            }
+
+            if (cfg.handleInfo && cfg.handleInfo.active) {
+                const hi = cfg.handleInfo;
+                document.getElementById('has-handle').checked = true;
+                toggleHandleSection();
+                document.getElementById('handle-holes-count').value = hi.count || 2;
+                updateHandleCCInputs();
+                if (hi.cc1 !== undefined) document.getElementById('handle-cc1').value = hi.cc1;
+                if (hi.cc2 !== undefined) document.getElementById('handle-cc2').value = hi.cc2;
+                if (hi.cc3 !== undefined) document.getElementById('handle-cc3').value = hi.cc3;
+                if (hi.refY) document.getElementById('handle-ref-y').value = hi.refY;
+                if (hi.yPos !== undefined) document.getElementById('handle-y-pos').value = hi.yPos;
+                if (hi.xPos !== undefined) document.getElementById('handle-x-pos').value = hi.xPos;
+                if (hi.diameter !== undefined) document.getElementById('handle-diameter').value = hi.diameter;
+            }
+
+            if (cfg.millingHandleInfo && cfg.millingHandleInfo.active) {
+                const mi = cfg.millingHandleInfo;
+                document.getElementById('has-milling-handle').checked = true;
+                toggleMillingHandleSection();
+                if (mi.model) document.getElementById('milling-handle-model').value = mi.model;
+                if (mi.length !== undefined) document.getElementById('milling-handle-length').value = mi.length;
+                if (mi.ref) document.getElementById('milling-handle-ref').value = mi.ref;
+                if (mi.pos !== undefined) document.getElementById('milling-handle-pos').value = mi.pos;
+                updateMillingHandleUI();
             }
 
             if (cfg.shelvesOnly) {
@@ -2785,17 +2947,24 @@ function loadOrderForEditing(encodedOrdStr) {
         }
     }
 
-    // 2. TIKSLUS LENTYNĖLIŲ ATSTATYMAS
+    checkPleveleVisibility();
+    if (ord.configJson) {
+        try {
+            const cfg = JSON.parse(ord.configJson);
+            if (cfg.pleveleValue !== undefined && document.getElementById('plevele-group').style.display !== 'none') {
+                document.getElementById('plevele').value = cfg.pleveleValue;
+            }
+        } catch (e) {}
+    }
+
     const shelfQtyVal = Number(ord.shelfQty) || 0;
     document.getElementById('shelf-qty').value = shelfQtyVal;
 
-    // Išvalome briaunas
     document.getElementById('shelf-polished').checked = false;
     document.getElementById('shelf-ground').checked = false;
     document.getElementById('shelf-tempered').checked = false;
 
     if (shelfQtyVal > 0) {
-        // Matmenys
         const sDims = ord.shelfDims || "";
         if (sDims) {
             const parts = sDims.replace(/mm/g, '').split('x');
@@ -2805,7 +2974,6 @@ function loadOrderForEditing(encodedOrdStr) {
             }
         }
 
-        // Storis
         const sThick = ord.shelfThickness || "";
         if (sThick) {
             const thickSelect = document.getElementById('shelf-glass-thickness');
@@ -2817,7 +2985,6 @@ function loadOrderForEditing(encodedOrdStr) {
             }
         }
 
-        // Stiklo tipas
         const sGlass = ord.shelfGlass || "";
         if (sGlass) {
             const glassTypeSelect = document.getElementById('shelf-glass-type');
@@ -2829,7 +2996,6 @@ function loadOrderForEditing(encodedOrdStr) {
             }
         }
 
-        // Briaunos ir grūdinimas (tikriname tiek ord.shelfEdges, tiek shelfInfo)
         const edgesText = (ord.shelfEdges || "") + " " + (ord.shelfInfo || "");
         document.getElementById('shelf-polished').checked = edgesText.toLowerCase().includes('poliruota');
         document.getElementById('shelf-ground').checked = edgesText.toLowerCase().includes('šlifuota');
@@ -2837,12 +3003,16 @@ function loadOrderForEditing(encodedOrdStr) {
     }
 
     closeAdminBoardModal();
+    updateTokenUIStatus();
     draw();
-    alert(`Užsakymas (klientas: ${ord.client}) užkrautas redagavimui. Atlikę pakeitimus, paspauskite „UŽSAKYTI / SPAUSDINTI VISKĄ“.`);
+    alert(`Užsakymas (klientas: ${ord.client}) užkrautas redagavimui. Atlikę pakeitimus, paspauskite „ATNAUJINTI LENTOJE IR SPAUSDINTI“.`);
 }
 
-function sendToGoogleSheets(prebuiltItems) {
-    if(!GOOGLE_SCRIPT_URL) return;
+function sendToGoogleSheets(prebuiltItems, explicitToken) {
+    if (!GOOGLE_SCRIPT_URL) return;
+
+    const secretToken = (explicitToken !== undefined ? explicitToken : getSavedSecretToken());
+    if (!secretToken) return;
 
     const clientInput = document.getElementById('client-name').value.trim();
     const clientName = clientInput !== '' ? clientInput : 'Nenurodyta';
@@ -2850,7 +3020,6 @@ function sendToGoogleSheets(prebuiltItems) {
     const formattedDate = getFormattedDisplayDate();
     const selectedCity = document.getElementById('miestas').value;
     const userComment = document.getElementById('order-comment').value.trim();
-    const secretToken = localStorage.getItem('gamyba_secret_token') || "";
 
     let itemsToSave = prebuiltItems || (orderCart.length > 0 ? orderCart : getAllConfigItems());
 
@@ -2948,12 +3117,10 @@ function buildSimulatedPrintItem(ord) {
                 simulatedItem.summaryHtml = cfg.summaryContent.split('<div style="display:flex;')[0] + `<div style="display:flex; gap:15px; justify-content:center; margin-top:15px; flex-wrap:wrap;">${tempDiv.innerHTML}</div>`;
             } else {
                 const totalQty = (cfg.qtyMain || 0) + (cfg.mirror ? (cfg.qtyMirror || 0) : 0);
-                let qtyDetailsText = `${totalQty} vnt.`;
                 let dimsSummaryHtml = `<tr><td colspan="2"><b>Gaminio dydis:</b> <b style="font-size:13px; color:#000;">${cfg.h} x ${cfg.w} mm</b></td></tr>`;
                 
                 if (cfg.mirror) {
                     const otherSide = cfg.mainSide === 'kaire' ? 'desine' : 'kaire';
-                    qtyDetailsText = `Viso: ${totalQty} vnt. (${cfg.qtyMain} ${cfg.mainSide}, ${cfg.qtyMirror} ${otherSide})`;
                     dimsSummaryHtml = `<tr><td colspan="2"><b>Pagrindinės (${cfg.mainSide}):</b> ${cfg.h}x${cfg.w} mm (${cfg.qtyMain} vnt.) | <b>Veidrodinės (${otherSide}):</b> ${cfg.hMirror}x${cfg.wMirror} mm (${cfg.qtyMirror} vnt.)</td></tr>`;
                 }
 
@@ -3185,6 +3352,7 @@ updateInputs();
 checkPleveleVisibility();
 checkSpecial();
 updateHingeOptions();
+updateTokenUIStatus();
 draw();
 </script>
 
