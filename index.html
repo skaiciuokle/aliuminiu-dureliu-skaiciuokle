@@ -1855,9 +1855,10 @@ function gatherCurrentConfigData() {
             }
         }
 
-        const glazingFee = getGlazingFee(profileText, dH);
+        const glazingFee = (glassM2Price > 0) ? getGlazingFee(profileText, dH) : 0;
+        const frameWorkFee = 15;
 
-        let pureFrameCost = (((dW + dH) * 2) / 1000 * mPrice) + plevelePrice + doorHingeSetCost + glazingFee + extraHingeFeePerDoor + handleDrillingFeePerDoor + millingPricePerDoor;
+        let pureFrameCost = (((dW + dH) * 2) / 1000 * mPrice) + frameWorkFee + plevelePrice + doorHingeSetCost + glazingFee + extraHingeFeePerDoor + handleDrillingFeePerDoor + millingPricePerDoor;
         if (isZ24 || isZ23Hidden) {
             const z24Val = parseFloat(document.getElementById('z24-type').value);
             pureFrameCost += z24Val;
